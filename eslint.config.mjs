@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // macOS AppleDouble metadata files created on non-APFS volumes (e.g. the T7
+    // drive). They are not source — never lint them.
+    "**/._*",
   ]),
 ]);
 
