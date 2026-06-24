@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { ListChecks, Target, GraduationCap, TrendingUp, ArrowRight } from "lucide-react";
+import { ListChecks, Target, GraduationCap, TrendingUp, ArrowRight, Leaf } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getUserProfile, getLearningList } from "@/lib/db/queries";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProfileStrength } from "@/features/dashboard/profile-strength";
+import { GreenDigital } from "@/features/dashboard/green-digital";
 import { LearningBoard } from "@/features/dashboard/learning-board";
 import { EmptyState } from "@/features/dashboard/empty-state";
 import { MatchesBar } from "@/components/charts/matches-bar";
@@ -173,8 +174,29 @@ export default async function DashboardPage({
           </CardContent>
         </Card>
 
+        {/* Green & digital readiness */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("greenDigital")}</CardTitle>
+            <CardDescription>{t("greenDigitalDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {skills.length > 0 ? (
+              <GreenDigital skills={skills} />
+            ) : (
+              <EmptyState
+                icon={Leaf}
+                title={te("skillsTitle")}
+                body={te("skillsBody")}
+                ctaLabel={te("skillsCta")}
+                ctaHref="/dashboard/skills"
+              />
+            )}
+          </CardContent>
+        </Card>
+
         {/* Learning board */}
-        <Card className="lg:col-span-3">
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>{t("learningBoard")}</CardTitle>
             <CardDescription>{t("learningBoardDesc")}</CardDescription>

@@ -21,6 +21,10 @@ export interface Skill {
   reuseLevel: ReuseLevel | null;
   label: string;
   description: string | null;
+  /** In the ESCO green-economy skills collection. */
+  isGreen: boolean;
+  /** In the ESCO digital skills collection. */
+  isDigital: boolean;
 }
 
 /** An occupation resolved into the active locale. */
@@ -30,6 +34,8 @@ export interface Occupation {
   iscoGroup: string | null;
   label: string;
   description: string | null;
+  /** ESCO green-economy share (0–1) for this occupation; null if unscored. */
+  greenShare: number | null;
 }
 
 /** A skill in the context of an occupation, with whether the user has it. */

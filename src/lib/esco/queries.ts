@@ -20,9 +20,9 @@ import type {
  */
 
 const OCC_COLS =
-  "concept_uri, code, isco_group, preferred_label_en, preferred_label_fi, alt_labels_en, alt_labels_fi, description_en, description_fi";
+  "concept_uri, code, isco_group, preferred_label_en, preferred_label_fi, alt_labels_en, alt_labels_fi, description_en, description_fi, green_share";
 const SKILL_COLS =
-  "concept_uri, skill_type, reuse_level, preferred_label_en, preferred_label_fi, alt_labels_en, alt_labels_fi, description_en, description_fi";
+  "concept_uri, skill_type, reuse_level, preferred_label_en, preferred_label_fi, alt_labels_en, alt_labels_fi, description_en, description_fi, is_green, is_digital";
 
 type Row = Record<string, unknown>;
 
@@ -49,6 +49,7 @@ function toOccupation(row: Row, locale: Locale): Occupation {
     iscoGroup: (row.isco_group as string) ?? null,
     label: pick(row, "preferred_label_fi", "preferred_label_en", locale),
     description: pickNullable(row, "description_fi", "description_en", locale),
+    greenShare: row.green_share != null ? Number(row.green_share) : null,
   };
 }
 
@@ -59,6 +60,8 @@ function toSkill(row: Row, locale: Locale): Skill {
     reuseLevel: (row.reuse_level as Skill["reuseLevel"]) ?? null,
     label: pick(row, "preferred_label_fi", "preferred_label_en", locale),
     description: pickNullable(row, "description_fi", "description_en", locale),
+    isGreen: Boolean(row.is_green),
+    isDigital: Boolean(row.is_digital),
   };
 }
 

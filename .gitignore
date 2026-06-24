@@ -46,5 +46,9 @@ next-env.d.ts
 # runtime (data lives in Supabase); never commit it.
 tomcat-esp-api-v03_94/
 
+# ESCO classification CSVs / zips (imported into Supabase by hand; large, not
+# part of the app). The import recipe lives in supabase/esco-import/*.sql.
+/supabase/escocsv/
+
 # The original Claude Code prompt brief (keep local, not part of the app)
 esco-app-claude-code-prompt-v2.md

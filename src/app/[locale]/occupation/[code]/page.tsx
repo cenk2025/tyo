@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Target as TargetIcon } from "lucide-react";
+import { CheckCircle2, Target as TargetIcon, Leaf } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getOccupationByCode, getOccupationSkills } from "@/lib/esco/queries";
 import { getCurrentUser } from "@/lib/auth";
@@ -74,10 +74,22 @@ export default async function OccupationPage({
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
         {/* Header */}
         <div className="mb-6">
-          {grp && (
-            <Badge variant="muted" className="mb-2">
-              {majorGroupLabel(grp, locale as Locale)}
-            </Badge>
+          {(grp || (occupation.greenShare != null && occupation.greenShare > 0)) && (
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              {grp && (
+                <Badge variant="muted">{majorGroupLabel(grp, locale as Locale)}</Badge>
+              )}
+              {occupation.greenShare != null && occupation.greenShare > 0 && (
+                <Badge
+                  variant="muted"
+                  className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                  title={t("greenFieldHint")}
+                >
+                  <Leaf className="h-3 w-3" />
+                  {t("greenField", { percent: Math.round(occupation.greenShare * 100) })}
+                </Badge>
+              )}
+            </div>
           )}
           <h1 className="text-3xl font-bold tracking-tight">{occupation.label}</h1>
           {occupation.description && (

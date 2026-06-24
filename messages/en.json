@@ -131,6 +131,12 @@
     "gapOverTimeDesc": "How your match score for target occupations has changed",
     "learningBoard": "Learning list",
     "learningBoardDesc": "Skills you're learning next",
+    "greenDigital": "Green & digital skills",
+    "greenDigitalDesc": "How future-ready your skill set is",
+    "greenDigitalHint": "Based on the EU ESCO green-economy and digital skills collections.",
+    "greenSkills": "Green skills",
+    "digitalSkills": "Digital skills",
+    "ofTotal": "{count} of {total}",
     "viewAllMatches": "View all matches",
     "addedThisSession": "added"
   },
@@ -168,6 +174,8 @@
   "occupation": {
     "essentialSkills": "Essential skills",
     "optionalSkills": "Optional skills",
+    "greenField": "{percent}% green field",
+    "greenFieldHint": "Share of this occupation's work tied to the green economy (EU ESCO).",
     "skillsYouHave": "Skills you have",
     "skillsYouMiss": "Skills you're missing",
     "coverageSummary": "You cover {matched} of {total} essential skills ({percent})",
