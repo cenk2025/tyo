@@ -131,6 +131,12 @@
     "gapOverTimeDesc": "Osumaprosenttisi kehitys tavoiteammateissa",
     "learningBoard": "Oppimislista",
     "learningBoardDesc": "Taidot, joita opettelet seuraavaksi",
+    "greenDigital": "Vihreät & digitaidot",
+    "greenDigitalDesc": "Kuinka tulevaisuusvalmis taitosi on",
+    "greenDigitalHint": "Perustuu EU:n ESCO-luokituksen vihreän talouden ja digitaitojen kokoelmiin.",
+    "greenSkills": "Vihreät taidot",
+    "digitalSkills": "Digitaidot",
+    "ofTotal": "{count} / {total}",
     "viewAllMatches": "Näytä kaikki osumat",
     "addedThisSession": "lisätty"
   },
@@ -168,6 +174,8 @@
   "occupation": {
     "essentialSkills": "Ydintaidot",
     "optionalSkills": "Valinnaiset taidot",
+    "greenField": "{percent}% vihreä ala",
+    "greenFieldHint": "Kuinka suuri osa tämän ammatin työstä liittyy vihreään talouteen (EU ESCO).",
     "skillsYouHave": "Taidot, jotka sinulla on",
     "skillsYouMiss": "Taidot, joita sinulta puuttuu",
     "coverageSummary": "Hallitset {matched} / {total} ydintaitoa ({percent})",
