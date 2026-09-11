@@ -215,6 +215,65 @@ export async function searchSkills(
   }
 }
 
+/**
+ * Fuzzy skill search by trigram SIMILARITY rather than substring containment —
+ * finds candidates ILIKE would miss (e.g. "tiiminjohtaminen" vs ESCO's "johtaa
+ * tiimiä"). Used to build the candidate pool for AI-assist's Claude-grounded
+ * resolver (resolve-skills.ts); each result carries its similarity score so
+ * the caller can rank/cap without a second query.
+ */
+export async function searchSkillsFuzzy(
+  query: string,
+  locale: Locale,
+  limit = 8
+): Promise<(Skill & { similarity: number })[]> {
+  if (!isSupabaseConfigured() || query.trim().length < 2) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("search_skills_fuzzy", {
+      p_query: query.trim(),
+      p_locale: locale,
+      p_limit: limit,
+    });
+    if (error) throw error;
+    return ((data ?? []) as Row[]).map((r) => ({
+      ...toSkill(r, locale),
+      similarity: Number(r.similarity ?? 0),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Semantic skill search via precomputed embeddings (0007 migration's
+ * match_skills_semantic RPC). `queryEmbedding` must come from the same model
+ * that produced `skills.embedding_fi` — see src/lib/ai/embeddings.ts.
+ */
+export async function searchSkillsSemantic(
+  queryEmbedding: number[],
+  locale: Locale,
+  limit = 15,
+  minSimilarity = 0
+): Promise<(Skill & { similarity: number })[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("match_skills_semantic", {
+      p_embedding: `[${queryEmbedding.join(",")}]`,
+      p_limit: limit,
+      p_min_similarity: minSimilarity,
+    });
+    if (error) throw error;
+    return ((data ?? []) as Row[]).map((r) => ({
+      ...toSkill(r, locale),
+      similarity: Number(r.similarity ?? 0),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 /** Curated transversal skills grid (onboarding step 2). */
 export async function getTransversalSkills(
   locale: Locale,

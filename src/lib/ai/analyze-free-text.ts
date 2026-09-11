@@ -1,22 +1,22 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured, isAiConfigured } from "@/lib/flags";
-import { searchSkills } from "@/lib/esco/queries";
-import { extractSkillPhrases } from "./extract-skills";
+import { isSupabaseConfigured } from "@/lib/flags";
+import { resolveHybrid } from "./resolve-hybrid";
 import type { Locale, Skill } from "@/lib/esco/types";
 
 /**
  * Map a free-text self-description to candidate ESCO skills.
  *
- * Two-stage, ESCO-as-invisible-engine design:
- *   1. Claude turns the messy free text into canonical skill PHRASES
- *      (extract-skills.ts) — the model never sees or invents ESCO URIs.
- *   2. Each phrase is fuzzy-matched against the `skills` table, so every
- *      returned skill is a real ESCO row the rest of the app already knows.
+ * No LLM call: resolveHybrid (resolve-hybrid.ts) merges NVIDIA's free-tier
+ * embedding similarity with Postgres trigram search directly against the raw
+ * description — no Anthropic cost, at any volume. See resolve-hybrid.ts for
+ * why both signals are needed and what precision this trades away versus the
+ * (still available, just unused here) Claude-grounded resolver in
+ * resolve-skills.ts.
  *
- * Falls back to the original trigram keyword heuristic when no Anthropic key is
- * configured or the model call fails — the feature degrades, never errors. The
- * server action contract (`Skill[]`, source 'ai_suggested' on save) is unchanged.
+ * Falls back to a plain ILIKE keyword search only if resolveHybrid throws
+ * unexpectedly — the feature degrades, never errors. The server action
+ * contract (`Skill[]`, source 'ai_suggested' on save) is unchanged.
  */
 export async function analyzeFreeText(
   text: string,
@@ -27,54 +27,17 @@ export async function analyzeFreeText(
   const cleaned = text.trim();
   if (cleaned.length < 8) return [];
 
-  if (isAiConfigured()) {
-    try {
-      const phrases = await extractSkillPhrases(cleaned, locale, limit);
-      if (phrases.length > 0) {
-        return await resolvePhrases(phrases, locale, limit);
-      }
-      // AI ran but found nothing → no suggestions (don't fall back to noise).
-      return [];
-    } catch (err) {
-      console.error("AI skill extraction failed, using keyword fallback:", err);
-      // fall through to the heuristic below
-    }
+  try {
+    return await resolveHybrid(cleaned, locale, limit);
+  } catch (err) {
+    console.error("Hybrid skill resolution failed, using keyword fallback:", err);
+    return keywordFallback(cleaned, locale, limit);
   }
-
-  return keywordFallback(cleaned, locale, limit);
 }
 
 /**
- * Resolve canonical skill phrases to real ESCO skills. Searches the DB per
- * phrase (top few each), preserving phrase order and de-duplicating by URI.
- */
-async function resolvePhrases(
-  phrases: string[],
-  locale: Locale,
-  limit: number
-): Promise<Skill[]> {
-  const perPhrase = await Promise.all(
-    phrases.map((p) => searchSkills(p, locale, 3))
-  );
-
-  const seen = new Set<string>();
-  const out: Skill[] = [];
-  // Take the best hit from each phrase first, then widen to second/third hits.
-  for (let rank = 0; rank < 3 && out.length < limit; rank++) {
-    for (const hits of perPhrase) {
-      const skill = hits[rank];
-      if (!skill || seen.has(skill.conceptUri)) continue;
-      seen.add(skill.conceptUri);
-      out.push(skill);
-      if (out.length >= limit) break;
-    }
-  }
-  return out;
-}
-
-/**
- * Original heuristic: extract length-≥4 keywords and ILIKE them against skill
- * labels/descriptions. Used when the LLM is unavailable or errors.
+ * Last-resort heuristic: extract length-≥4 keywords and ILIKE them against
+ * skill labels/descriptions. Only reached if resolveHybrid itself throws.
  */
 async function keywordFallback(
   text: string,

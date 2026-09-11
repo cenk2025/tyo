@@ -19,3 +19,13 @@ export function isAiConfigured(): boolean {
   const key = process.env.ANTHROPIC_API_KEY;
   return Boolean(key && key.trim() && !key.includes("your-anthropic"));
 }
+
+/**
+ * True when a NVIDIA embedding key is present (server-only). When false, the
+ * phrase → ESCO skill resolution uses the trigram search instead of vector
+ * similarity — same contract, lower recall.
+ */
+export function isEmbeddingsConfigured(): boolean {
+  const key = process.env.NVIDIA_API_KEY;
+  return Boolean(key && key.trim() && key.startsWith("nvapi-"));
+}
