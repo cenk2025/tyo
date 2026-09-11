@@ -96,16 +96,34 @@
     "step1Title": "What is or was your occupation?",
     "step1Subtitle": "Find your current or previous job. We'll pre-fill its essential skills so you can pick the ones you actually have.",
     "step1Prefill": "Which of these skills do you have?",
-    "step1NoOccupation": "Skip — I can't find my occupation",
+    "step1NoOccupationPrompt": "Never had a job, or not sure what to search for? That's completely fine.",
+    "step1NoOccupation": "I don't have an occupation yet — explore my skills instead",
     "step2Title": "Add more of your skills",
     "step2Subtitle": "Search for skills in your own words, or pick from common, widely useful skills below.",
+    "step2TitleDiscovery": "What are you good at?",
+    "step2SubtitleDiscovery": "Pick anything that fits — from everyday life, school, hobbies, or languages you speak. There's no wrong answer here.",
     "step2Transversal": "Common, transferable skills",
     "step3Title": "Which occupations interest you?",
     "step3Subtitle": "Pick 1–3 occupations you'd like to grow toward. This is optional — you can add targets later too.",
+    "step3Suggested": "Based on what you picked, you might like:",
     "selectedSkills": "Selected skills: {count}",
     "selectedTargets": "Selected target occupations: {count}",
     "finishButton": "Go to dashboard",
-    "rerun": "Run setup again"
+    "rerun": "Run setup again",
+    "discovery": {
+      "languagesTitle": "Languages",
+      "languagesSubtitle": "Every language you speak is a real skill — search for it below.",
+      "languagesPlaceholder": "Search a language, e.g. Somali, Arabic, Russian…",
+      "category": {
+        "people": "Working with people",
+        "organizing": "Organizing & planning",
+        "thinking": "Thinking & solving problems",
+        "digital": "Computers & digital",
+        "handsOn": "Hands-on & practical",
+        "personal": "Personal strengths",
+        "caring": "Caring & helping"
+      }
+    }
   },
   "dashboard": {
     "title": "Dashboard",

@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/flags";
+import { DISCOVERY_CATEGORIES } from "./discovery-categories";
 import type {
   Locale,
   Occupation,
@@ -362,5 +363,65 @@ export async function getOccupationsForSkill(
     return { essential, optional };
   } catch {
     return { essential: [], optional: [] };
+  }
+}
+
+/**
+ * Curated skill groups for onboarding's occupation-less discovery branch
+ * (see discovery-categories.ts for what's in each group and why). Resolves
+ * the hand-picked URIs to real, localized Skill rows in one query.
+ */
+export async function getDiscoverySkills(
+  locale: Locale
+): Promise<{ category: string; skills: Skill[] }[]> {
+  const allUris = DISCOVERY_CATEGORIES.flatMap((c) => c.skillUris);
+  const resolved = await getSkillsByUris(allUris, locale);
+  const byUri = new Map(resolved.map((s) => [s.conceptUri, s]));
+  return DISCOVERY_CATEGORIES.map((c) => ({
+    category: c.key,
+    skills: c.skillUris
+      .map((u) => byUri.get(u))
+      .filter((s): s is Skill => Boolean(s)),
+  })).filter((c) => c.skills.length > 0);
+}
+
+/**
+ * Suggest occupations from a set of skills BEFORE they're saved to a user
+ * profile — used by onboarding's discovery branch to show "based on what you
+ * picked" inspiration while the wizard is still in local state, with no
+ * account-side data to run the real match_occupations RPC against.
+ *
+ * This is deliberately a much cruder heuristic than that RPC (essential
+ * relations weighted 2x, optional 1x, summed across all picked skills) — it
+ * only needs to surface plausible, inspiring candidates, not rank precisely.
+ * Once the profile is saved, the dashboard's real matches take over.
+ */
+export async function previewOccupationsForSkills(
+  skillUris: string[],
+  locale: Locale,
+  limit = 6
+): Promise<Occupation[]> {
+  if (!isSupabaseConfigured() || skillUris.length === 0) return [];
+  try {
+    const perSkill = await Promise.all(
+      skillUris.map((uri) => getOccupationsForSkill(uri, locale, 60))
+    );
+    const scored = new Map<string, { occupation: Occupation; score: number }>();
+    for (const { essential, optional } of perSkill) {
+      for (const occ of essential) {
+        const prev = scored.get(occ.conceptUri);
+        scored.set(occ.conceptUri, { occupation: occ, score: (prev?.score ?? 0) + 2 });
+      }
+      for (const occ of optional) {
+        const prev = scored.get(occ.conceptUri);
+        scored.set(occ.conceptUri, { occupation: occ, score: (prev?.score ?? 0) + 1 });
+      }
+    }
+    return Array.from(scored.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((s) => s.occupation);
+  } catch {
+    return [];
   }
 }

@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Sparkles } from "lucide-react";
-import { getTransversalSkills } from "@/lib/esco/queries";
+import { getTransversalSkills, getDiscoverySkills } from "@/lib/esco/queries";
 import type { Locale } from "@/lib/esco/types";
 import { OnboardingWizard } from "@/features/onboarding/wizard";
 import { GuestMigrator } from "@/features/auth/guest-migrator";
@@ -14,7 +14,10 @@ export default async function OnboardingPage({
   setRequestLocale(locale);
   const t = await getTranslations("onboarding");
   const tApp = await getTranslations("app");
-  const transversalSkills = await getTransversalSkills(locale as Locale, 18);
+  const [transversalSkills, discoveryCategories] = await Promise.all([
+    getTransversalSkills(locale as Locale, 18),
+    getDiscoverySkills(locale as Locale),
+  ]);
 
   return (
     <main className="min-h-screen px-4 py-10">
@@ -26,7 +29,10 @@ export default async function OnboardingPage({
       <h1 className="mx-auto mb-8 max-w-2xl text-2xl font-bold tracking-tight">
         {t("title")}
       </h1>
-      <OnboardingWizard transversalSkills={transversalSkills} />
+      <OnboardingWizard
+        transversalSkills={transversalSkills}
+        discoveryCategories={discoveryCategories}
+      />
     </main>
   );
 }

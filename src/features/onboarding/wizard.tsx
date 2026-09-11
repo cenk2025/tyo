@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight, Loader2, Check } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
@@ -9,7 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { OccupationSearch } from "@/features/explore/occupation-search";
 import { SkillSearch } from "@/features/explore/skill-search";
+import { SkillDiscovery } from "./skill-discovery";
 import { getOccupationSkillsAction, completeOnboarding } from "./actions";
+import { previewOccupationsForSkillsAction } from "@/lib/esco/actions";
 import type { Locale, Occupation, Skill, OccupationSkill } from "@/lib/esco/types";
 import type { SkillSource } from "@/lib/db/types";
 import { cn } from "@/lib/utils";
@@ -18,8 +20,10 @@ type ChosenSkill = { skill: Skill; source: SkillSource };
 
 export function OnboardingWizard({
   transversalSkills,
+  discoveryCategories,
 }: {
   transversalSkills: Skill[];
+  discoveryCategories: { category: string; skills: Skill[] }[];
 }) {
   const t = useTranslations("onboarding");
   const tc = useTranslations("common");
@@ -28,14 +32,32 @@ export function OnboardingWizard({
   const [isPending, startTransition] = useTransition();
 
   const [step, setStep] = useState(1);
+  const [noOccupation, setNoOccupation] = useState(false);
   const [currentOcc, setCurrentOcc] = useState<Occupation | null>(null);
   const [prefill, setPrefill] = useState<OccupationSkill[]>([]);
   const [loadingPrefill, setLoadingPrefill] = useState(false);
   const [skills, setSkills] = useState<Map<string, ChosenSkill>>(new Map());
   const [targets, setTargets] = useState<Map<string, Occupation>>(new Map());
+  const [suggestedOccupations, setSuggestedOccupations] = useState<Occupation[]>([]);
+  const [loadingSuggestions, startSuggestionsTransition] = useTransition();
 
   const selectedSkillUris = new Set(skills.keys());
   const selectedTargetUris = new Set(targets.keys());
+
+  // Step 3 "based on what you picked" preview — only for the discovery
+  // branch, recomputed each time step 3 is (re-)entered, not on every toggle.
+  // The setState that matters lives inside startSuggestionsTransition's async
+  // callback, not the effect body itself, so loadingSuggestions tracks it
+  // without a manual flag.
+  useEffect(() => {
+    if (step !== 3 || !noOccupation) return;
+    startSuggestionsTransition(async () => {
+      // Empty skillUris is a no-op that resolves to [] — no need to special-case it.
+      const result = await previewOccupationsForSkillsAction([...skills.keys()], locale);
+      setSuggestedOccupations(result);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, noOccupation, locale]);
 
   function addSkill(skill: Skill, source: SkillSource) {
     setSkills((prev) => new Map(prev).set(skill.conceptUri, { skill, source }));
@@ -144,45 +166,77 @@ export function OnboardingWizard({
               )}
             </div>
           )}
+
+          <div className="rounded-lg border border-dashed p-4 text-center">
+            <p className="mb-2 text-sm text-muted-foreground">
+              {t("step1NoOccupationPrompt")}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setNoOccupation(true);
+                setStep(2);
+              }}
+            >
+              {t("step1NoOccupation")}
+            </Button>
+          </div>
         </section>
       )}
 
-      {/* STEP 2 — add more skills + transversal grid */}
+      {/* STEP 2 — add more skills + transversal grid, or the discovery
+          branch (categorized skills + language search) for step1NoOccupation */}
       {step === 2 && (
         <section className="space-y-4">
           <header>
-            <h2 className="text-xl font-semibold">{t("step2Title")}</h2>
-            <p className="text-sm text-muted-foreground">{t("step2Subtitle")}</p>
+            <h2 className="text-xl font-semibold">
+              {noOccupation ? t("step2TitleDiscovery") : t("step2Title")}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {noOccupation ? t("step2SubtitleDiscovery") : t("step2Subtitle")}
+            </p>
           </header>
 
-          <SkillSearch
-            onSelect={(s) => addSkill(s, "search")}
-            selectedUris={selectedSkillUris}
-          />
+          {noOccupation ? (
+            <SkillDiscovery
+              categories={discoveryCategories}
+              selectedUris={selectedSkillUris}
+              onToggle={(s) => toggleSkill(s, "transversal")}
+              onSearchSelect={(s) => addSkill(s, "search")}
+            />
+          ) : (
+            <>
+              <SkillSearch
+                onSelect={(s) => addSkill(s, "search")}
+                selectedUris={selectedSkillUris}
+              />
 
-          <div>
-            <p className="mb-2 text-sm font-medium">{t("step2Transversal")}</p>
-            <div className="flex flex-wrap gap-2">
-              {transversalSkills.map((s) => {
-                const checked = skills.has(s.conceptUri);
-                return (
-                  <button
-                    key={s.conceptUri}
-                    type="button"
-                    onClick={() => toggleSkill(s, "transversal")}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-sm transition-colors",
-                      checked
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "hover:bg-accent"
-                    )}
-                  >
-                    {s.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+              <div>
+                <p className="mb-2 text-sm font-medium">{t("step2Transversal")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {transversalSkills.map((s) => {
+                    const checked = skills.has(s.conceptUri);
+                    return (
+                      <button
+                        key={s.conceptUri}
+                        type="button"
+                        onClick={() => toggleSkill(s, "transversal")}
+                        className={cn(
+                          "rounded-full border px-3 py-1.5 text-sm transition-colors",
+                          checked
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "hover:bg-accent"
+                        )}
+                      >
+                        {s.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
 
           <p className="text-sm text-muted-foreground">
             {t("selectedSkills", { count: skills.size })}
@@ -197,6 +251,38 @@ export function OnboardingWizard({
             <h2 className="text-xl font-semibold">{t("step3Title")}</h2>
             <p className="text-sm text-muted-foreground">{t("step3Subtitle")}</p>
           </header>
+
+          {noOccupation && skills.size > 0 && (
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("step3Suggested")}</p>
+              {loadingSuggestions ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : suggestedOccupations.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{tc("noResults")}</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {suggestedOccupations.map((o) => {
+                    const checked = selectedTargetUris.has(o.conceptUri);
+                    return (
+                      <button
+                        key={o.conceptUri}
+                        type="button"
+                        onClick={() => toggleTarget(o)}
+                        className={cn(
+                          "rounded-full border px-3 py-1.5 text-sm transition-colors",
+                          checked
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "hover:bg-accent"
+                        )}
+                      >
+                        {o.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           <OccupationSearch
             onSelect={toggleTarget}
