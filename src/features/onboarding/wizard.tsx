@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowLeft, ArrowRight, Loader2, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Check, Plus } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,14 @@ export function OnboardingWizard({
   const [targets, setTargets] = useState<Map<string, Occupation>>(new Map());
   const [suggestedOccupations, setSuggestedOccupations] = useState<Occupation[]>([]);
   const [loadingSuggestions, startSuggestionsTransition] = useTransition();
+  // Discovery branch: someone with no current occupation may still have had a
+  // summer job, short-term job, or internship — a much more accurate skill
+  // source than the curated category chips. Accumulates across multiple
+  // searched jobs rather than replacing on each pick, unlike step 1's single
+  // currentOcc/prefill (which models "your one current/previous job").
+  const [pastJobs, setPastJobs] = useState<Map<string, Occupation>>(new Map());
+  const [pastJobSkills, setPastJobSkills] = useState<Map<string, OccupationSkill>>(new Map());
+  const [loadingPastJobSkills, startPastJobsTransition] = useTransition();
 
   const selectedSkillUris = new Set(skills.keys());
   const selectedTargetUris = new Set(targets.keys());
@@ -77,6 +85,19 @@ export function OnboardingWizard({
     const occSkills = await getOccupationSkillsAction(occ.conceptUri, locale);
     setPrefill(occSkills.filter((s) => s.relationType === "essential"));
     setLoadingPrefill(false);
+  }
+
+  function addPastJob(occ: Occupation) {
+    setPastJobs((prev) => new Map(prev).set(occ.conceptUri, occ));
+    startPastJobsTransition(async () => {
+      const occSkills = await getOccupationSkillsAction(occ.conceptUri, locale);
+      const essential = occSkills.filter((s) => s.relationType === "essential");
+      setPastJobSkills((prev) => {
+        const next = new Map(prev);
+        for (const s of essential) if (!next.has(s.conceptUri)) next.set(s.conceptUri, s);
+        return next;
+      });
+    });
   }
 
   function toggleTarget(occ: Occupation) {
@@ -199,12 +220,69 @@ export function OnboardingWizard({
           </header>
 
           {noOccupation ? (
-            <SkillDiscovery
-              categories={discoveryCategories}
-              selectedUris={selectedSkillUris}
-              onToggle={(s) => toggleSkill(s, "transversal")}
-              onSearchSelect={(s) => addSkill(s, "search")}
-            />
+            <>
+              <div className="space-y-3 rounded-lg border p-4">
+                <div>
+                  <p className="text-sm font-medium">{t("step2PastJobsTitle")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("step2PastJobsSubtitle")}
+                  </p>
+                </div>
+
+                <OccupationSearch
+                  onSelect={addPastJob}
+                  selectedUris={new Set(pastJobs.keys())}
+                  placeholder={t("step2PastJobsPlaceholder")}
+                />
+
+                {pastJobs.size > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {t("step2PastJobsAdded", {
+                      jobs: [...pastJobs.values()].map((o) => o.label).join(", "),
+                    })}
+                  </p>
+                )}
+
+                {loadingPastJobSkills ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  pastJobSkills.size > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {[...pastJobSkills.values()].map((s) => {
+                        const checked = skills.has(s.conceptUri);
+                        return (
+                          <button
+                            key={s.conceptUri}
+                            type="button"
+                            onClick={() => toggleSkill(s, "occupation_prefill")}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                              checked
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "hover:bg-accent"
+                            )}
+                          >
+                            {checked ? (
+                              <Check className="h-3.5 w-3.5" />
+                            ) : (
+                              <Plus className="h-3.5 w-3.5" />
+                            )}
+                            {s.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )
+                )}
+              </div>
+
+              <SkillDiscovery
+                categories={discoveryCategories}
+                selectedUris={selectedSkillUris}
+                onToggle={(s) => toggleSkill(s, "transversal")}
+                onSearchSelect={(s) => addSkill(s, "search")}
+              />
+            </>
           ) : (
             <>
               <SkillSearch
