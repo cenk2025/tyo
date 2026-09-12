@@ -65,7 +65,33 @@ const EPERUSTEET_BASE = "https://eperusteet.opintopolku.fi/eperusteet-service/ap
 const VOCATIONAL_TYPES = new Set(["koulutustyyppi_1", "koulutustyyppi_11", "koulutustyyppi_12"]);
 /** Below this, a trigram "match" is more likely noise than a real degree-title correspondence. */
 const OCCUPATION_SIMILARITY_FLOOR = 0.3;
-const SKILLS_PER_PROGRAM = 15;
+/**
+ * Candidates pulled per program before hub correction, and links kept after.
+ *
+ * The pool is deliberately much larger than the final cut: the correction below
+ * needs to see how widely each skill matches across ALL programs, and it can
+ * only see what the pool contains. Both numbers cost nothing extra in NVIDIA
+ * quota — the embedding call already happened; this is a wider LIMIT on a
+ * Postgres query.
+ */
+const CANDIDATE_POOL = 50;
+const SKILLS_PER_PROGRAM = 10;
+/**
+ * How hard to penalise a skill for being close to many programs. 0 disables the
+ * correction. Weight 1 (the skill's plain cross-program mean) turned out to be
+ * too weak to matter: the penalty spread between a hub and a specialised skill
+ * is only ~0.025, against a ~0.18 spread of similarities inside one program's
+ * pool, so it only ever reordered near-ties. 3 puts the two on comparable
+ * footing. Lower it if specialised qualifications start losing their obvious
+ * matches; raise it if hub skills still dominate the frequency counts.
+ *
+ * The knob has a ceiling, though: it penalises breadth, and it cannot tell
+ * spurious breadth ("huoltaa jalkineiden kokoonpanovälineitä" in 24 unrelated
+ * programs) from real breadth ("ohjata ryhmätyötä", which genuinely does span
+ * trades). Pushing it far enough to kill the former will start eating the
+ * latter. Past that point the fix is better query text, not a bigger weight.
+ */
+const HUB_PENALTY = 3.0;
 const EMBED_BATCH = 32;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -94,6 +120,153 @@ async function fetchVocationalList() {
     await sleep(150); // be polite to a public gov API
   }
   return out;
+}
+
+/**
+ * Drop the existing links for the programs about to be rewritten.
+ *
+ * This import recomputes a program's links from scratch every run, so upsert
+ * alone is not enough: it refreshes the rows it writes but leaves behind rows
+ * from an earlier run that the current matching no longer produces. Those
+ * stale links accumulate silently — the first full import left ~117 of them
+ * after a partially-timed-out earlier attempt, and they are indistinguishable
+ * from current results once in the table.
+ */
+async function clearLinks(table, programIds, column = "program_id") {
+  for (let i = 0; i < programIds.length; i += 100) {
+    const { error } = await db
+      .from(table)
+      .delete()
+      .in(column, programIds.slice(i, i + 100));
+    if (error) die(`clearing ${table} failed: ${error.message}`);
+  }
+}
+
+/**
+ * Re-rank each program's candidate pool so that skills which match EVERYTHING
+ * stop winning, and keep the top SKILLS_PER_PROGRAM of what survives.
+ *
+ * The problem this solves, measured on the first full import: a handful of very
+ * specific ESCO skills ("huoltaa jalkineiden kokoonpanovälineitä" — maintain
+ * footwear assembly tools) were linked to 40-75 of the 328 qualifications, and
+ * not as filler at the bottom of the list — several ranked FIRST for some
+ * program. Neither a similarity floor nor a rank cut removes them, because the
+ * problem is that they genuinely score high against almost any query.
+ *
+ * That is hubness: in a high-dimensional embedding space some points sit close
+ * to the centre of the distribution and therefore turn up among the nearest
+ * neighbours of a disproportionate share of queries, regardless of meaning. It
+ * bites hardest here because the query is a long prose qualification summary,
+ * whose vector lands near the average of all Finnish vocational text — and the
+ * nearest neighbours of an average vector are hubs, not matches.
+ *
+ * The correction is CSLS (cross-domain similarity local scaling), reduced to
+ * what a batch import can do for free: every program's candidates are already
+ * in hand, so each skill's mean similarity ACROSS PROGRAMS is computable
+ * without another API call. Score each pairing by
+ *
+ *     similarity(program, skill) - HUB_PENALTY * mean similarity(skill, ALL
+ *     programs, absences imputed at the pool cut-off)
+ *
+ * A skill that is close to everything carries a large penalty; one that is
+ * close to only a few programs carries almost none, so genuinely specific
+ * matches rise and hubs fall. The penalty is estimated from the candidate
+ * pools, not the whole 14k-row table — a skill absent from every pool is not
+ * a hub by definition, so its unseen mean cannot change the ranking.
+ *
+ * The stored `similarity` stays the raw cosine: it is what the column
+ * documents, and the corrected score is a ranking device, not a measure of
+ * how close the two texts actually are.
+ */
+function correctForHubs(pools) {
+  const programCount = pools.size;
+  if (programCount === 0) return [];
+
+  // A skill missing from a program's pool did not score zero there — it scored
+  // somewhere below that pool's cut-off. Averaging only over the pools a skill
+  // DOES appear in silently averages over its best matches, which inverts the
+  // whole correction: a specialised skill matching three programs at 0.62 ends
+  // up penalised harder than a hub matching a hundred at 0.52. So absences are
+  // imputed at the mean cut-off and the mean is taken over EVERY program, which
+  // is what makes breadth itself the thing being penalised.
+  let cutoffSum = 0;
+  for (const candidates of pools.values()) {
+    cutoffSum += candidates.length ? candidates[candidates.length - 1].similarity : 0;
+  }
+  const impliedFloor = cutoffSum / programCount;
+
+  const stats = new Map(); // skill_uri -> { sum, n }
+  for (const candidates of pools.values()) {
+    for (const c of candidates) {
+      const stat = stats.get(c.skill_uri) ?? { sum: 0, n: 0 };
+      stat.sum += c.similarity;
+      stat.n += 1;
+      stats.set(c.skill_uri, stat);
+    }
+  }
+
+  const penalty = new Map();
+  for (const [uri, stat] of stats) {
+    const imputed = stat.sum + (programCount - stat.n) * impliedFloor;
+    penalty.set(uri, imputed / programCount);
+  }
+
+  const links = [];
+  for (const [programId, candidates] of pools) {
+    const scored = candidates.map((c) => ({
+      ...c,
+      adjusted: c.similarity - HUB_PENALTY * penalty.get(c.skill_uri),
+    }));
+    scored.sort((a, b) => b.adjusted - a.adjusted);
+    for (const c of scored.slice(0, SKILLS_PER_PROGRAM)) {
+      links.push({ program_id: programId, skill_uri: c.skill_uri, similarity: c.similarity });
+    }
+  }
+  return dedupeByKey(links, (l) => `${l.program_id}\u0000${l.skill_uri}`);
+}
+
+/**
+ * Collapse rows sharing a composite primary key, keeping the strongest match.
+ *
+ * Needed because Postgres refuses an upsert whose batch names the same
+ * conflict target twice ("ON CONFLICT DO UPDATE command cannot affect row a
+ * second time") — it will not silently pick a winner. That happens here
+ * routinely: one qualification carries several tutkintonimikkeet that resolve
+ * to the SAME ESCO occupation, so (program_id, occupation_uri) repeats. The
+ * per-title dedupe upstream only catches identical LABELS, not identical
+ * resolved URIs.
+ */
+function dedupeByKey(rows, key) {
+  const best = new Map();
+  for (const row of rows) {
+    const k = key(row);
+    const prev = best.get(k);
+    if (!prev || row.similarity > prev.similarity) best.set(k, row);
+  }
+  return Array.from(best.values());
+}
+
+/**
+ * Fail loudly, with evidence, if a batch still carries a repeated primary key.
+ * Postgres's "cannot affect row a second time" names neither the table nor the
+ * offending values, so catching it here — with the raw values and their JS
+ * types printed — turns a dead end into a diagnosis.
+ */
+function assertUniqueKeys(rows, key, table) {
+  const seen = new Map();
+  const dupes = [];
+  for (const row of rows) {
+    const k = key(row);
+    if (seen.has(k)) dupes.push([seen.get(k), row]);
+    else seen.set(k, row);
+  }
+  if (dupes.length === 0) return;
+  console.error(`\n  ${dupes.length} duplicate key(s) still present for ${table}:`);
+  for (const [a, b] of dupes.slice(0, 5)) {
+    console.error("    A:", JSON.stringify(a), "types:", Object.entries(a).map(([k2, v]) => `${k2}=${typeof v}`).join(" "));
+    console.error("    B:", JSON.stringify(b), "types:", Object.entries(b).map(([k2, v]) => `${k2}=${typeof v}`).join(" "));
+  }
+  die(`${table}: duplicate primary keys survived dedupe (see above)`);
 }
 
 /** Strips the light HTML (<p>, <dl>, <b>, etc.) ePerusteet embeds in rich-text fields. */
@@ -186,12 +359,16 @@ async function main() {
       }
     }
   }
-  console.log(`  ${occLinks.length} program-occupation link(s) found`);
+  const occRaw = occLinks.length;
+  occLinks = dedupeByKey(occLinks, (l) => `${l.program_id}\u0000${l.occupation_uri}`);
+  console.log(`  ${occLinks.length} program-occupation link(s) found (${occRaw} before dedupe)`);
+  assertUniqueKeys(occLinks, (l) => `${l.program_id}\u0000${l.occupation_uri}`, "education_program_occupations");
+  await clearLinks("education_program_occupations", programs.map((p) => p.id));
   for (let i = 0; i < occLinks.length; i += 500) {
     const { error } = await db
       .from("education_program_occupations")
       .upsert(occLinks.slice(i, i + 500), { onConflict: "program_id,occupation_uri" });
-    if (error) die(`education_program_occupations upsert failed: ${error.message}`);
+    if (error) die(`education_program_occupations upsert failed (slice ${i}-${i + 500}): ${error.message}`);
   }
 
   // ---- skill matching (embeddings, batched to conserve NVIDIA quota) ----
@@ -219,21 +396,26 @@ async function main() {
   }
 
   console.log("\n  Matching competence summaries to ESCO skills...");
-  let skillLinks = [];
+  const pools = new Map(); // program id -> [{ skill_uri, similarity }]
   for (const p of embeddable) {
     const vector = vectors.get(p.id);
     if (!vector) continue;
     const { data, error } = await db.rpc("match_skills_semantic", {
       p_embedding: `[${vector.join(",")}]`,
-      p_limit: SKILLS_PER_PROGRAM,
+      p_limit: CANDIDATE_POOL,
       p_min_similarity: 0,
     });
     if (error) { console.log(`    RPC error for program ${p.id}: ${error.message}`); continue; }
-    for (const s of data ?? []) {
-      skillLinks.push({ program_id: p.id, skill_uri: s.concept_uri, similarity: s.similarity });
-    }
+    pools.set(
+      p.id,
+      (data ?? []).map((s) => ({ skill_uri: s.concept_uri, similarity: s.similarity }))
+    );
   }
-  console.log(`  ${skillLinks.length} program-skill link(s) found`);
+
+  let skillLinks = correctForHubs(pools);
+  console.log(`  ${skillLinks.length} program-skill link(s) after hub correction`);
+  assertUniqueKeys(skillLinks, (l) => `${l.program_id}\u0000${l.skill_uri}`, "education_program_skills");
+  await clearLinks("education_program_skills", programs.map((p) => p.id));
   for (let i = 0; i < skillLinks.length; i += 500) {
     const { error } = await db
       .from("education_program_skills")
