@@ -11,19 +11,10 @@ export function isSupabaseConfigured(): boolean {
 }
 
 /**
- * True when a real Anthropic API key is present (server-only). When false, the
- * AI-assist free-text mapping falls back to the trigram keyword heuristic — so
- * the feature degrades gracefully instead of erroring.
- */
-export function isAiConfigured(): boolean {
-  const key = process.env.ANTHROPIC_API_KEY;
-  return Boolean(key && key.trim() && !key.includes("your-anthropic"));
-}
-
-/**
- * True when a NVIDIA embedding key is present (server-only). When false, the
- * phrase → ESCO skill resolution uses the trigram search instead of vector
- * similarity — same contract, lower recall.
+ * True when a NVIDIA key is present (server-only). It powers both halves of
+ * AI-assist: phrase extraction (chat) and semantic skill lookup (embeddings).
+ * When false, resolution falls back to trigram search only — same contract,
+ * lower recall.
  */
 export function isEmbeddingsConfigured(): boolean {
   const key = process.env.NVIDIA_API_KEY;

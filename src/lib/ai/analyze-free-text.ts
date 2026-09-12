@@ -7,16 +7,20 @@ import type { Locale, Skill } from "@/lib/esco/types";
 /**
  * Map a free-text self-description to candidate ESCO skills.
  *
- * No LLM call: resolveHybrid (resolve-hybrid.ts) merges NVIDIA's free-tier
- * embedding similarity with Postgres trigram search directly against the raw
- * description — no Anthropic cost, at any volume. See resolve-hybrid.ts for
- * why both signals are needed and what precision this trades away versus the
- * (still available, just unused here) Claude-grounded resolver in
+ * Runs entirely on NVIDIA's free tier — no Anthropic cost at any volume.
+ * resolveHybrid (resolve-hybrid.ts) first turns the description into canonical
+ * skill PHRASES with a free chat model, then merges trigram and embedding
+ * candidates by reciprocal rank fusion. That phrase step is load-bearing, not
+ * a nicety: matching the raw description directly was tried and regressed.
+ * A higher-precision Claude-grounded resolver is kept, unused, in
  * resolve-skills.ts.
  *
- * Falls back to a plain ILIKE keyword search only if resolveHybrid throws
- * unexpectedly — the feature degrades, never errors. The server action
- * contract (`Skill[]`, source 'ai_suggested' on save) is unchanged.
+ * Falls back to a plain ILIKE keyword search when resolveHybrid throws. Note
+ * that this includes the free chat endpoint being rate-limited or overloaded,
+ * so the fallback is less rare than "unexpected" would suggest — and it skips
+ * the embedding layer entirely, landing on the weakest tier. The feature
+ * degrades, never errors. The server action contract (`Skill[]`, source
+ * 'ai_suggested' on save) is unchanged.
  */
 export async function analyzeFreeText(
   text: string,
