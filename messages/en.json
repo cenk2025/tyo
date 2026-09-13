@@ -208,7 +208,10 @@
     "targetSet": "Target",
     "iscoGroup": "ISCO group {group}",
     "description": "Description",
-    "relatedOccupations": "Where this skill can take you"
+    "relatedOccupations": "Where this skill can take you",
+    "educationTitle": "Qualifications that lead to this occupation",
+    "educationSubtitle": "Finnish vocational qualifications (ePerusteet, Finnish National Agency for Education)",
+    "educationEmpty": "No direct Finnish vocational qualification was found for this occupation."
   },
   "explore": {
     "occupationsTitle": "Browse occupations",
@@ -244,6 +247,13 @@
     "markPlanned": "Move to planned",
     "completedAddsSkill": "When completed, the skill is added to your profile.",
     "empty": "Your learning list is empty."
+  },
+  "education": {
+    "perustutkinto": "Upper secondary vocational qualification",
+    "ammattitutkinto": "Further vocational qualification",
+    "erikoisammattitutkinto": "Specialist vocational qualification",
+    "coversSkills": "Covers {count} skills from your list",
+    "searchOpintopolku": "Search on Opintopolku"
   },
   "account": {
     "title": "Account",

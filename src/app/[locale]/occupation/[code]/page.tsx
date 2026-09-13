@@ -1,8 +1,9 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Target as TargetIcon, Leaf } from "lucide-react";
+import { CheckCircle2, Target as TargetIcon, Leaf, GraduationCap } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getOccupationByCode, getOccupationSkills } from "@/lib/esco/queries";
+import { getProgramsForOccupation } from "@/lib/education/queries";
 import { getCurrentUser } from "@/lib/auth";
 import {
   getUserSkillUris,
@@ -18,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { CircularProgress } from "@/components/charts/circular-progress";
 import { AddLearningButton } from "@/features/profile/add-learning-button";
 import { SetTargetButton } from "@/features/matching/set-target-button";
+import { ProgramList } from "@/features/education/program-list";
 import { formatPercent } from "@/lib/utils";
 
 async function getLearningUris(userId: string): Promise<Set<string>> {
@@ -46,8 +48,9 @@ export default async function OccupationPage({
   const occupation = await getOccupationByCode(code, locale as Locale);
   if (!occupation) notFound();
 
-  const [skills, user] = await Promise.all([
+  const [skills, programs, user] = await Promise.all([
     getOccupationSkills(occupation.conceptUri, locale as Locale),
+    getProgramsForOccupation(occupation.conceptUri, locale as Locale),
     getCurrentUser(),
   ]);
 
@@ -134,6 +137,27 @@ export default async function OccupationPage({
             </CardContent>
           </Card>
         )}
+
+        {/* Finnish qualifications leading here. Placed above the skill lists
+            because it answers the page's practical question ("how do I get
+            there?") in one glance, and because it is the one section a guest
+            gets full value from without signing in. */}
+        <section className="mb-8">
+          <h2 className="mb-1 flex items-center gap-2 font-semibold">
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            {t("educationTitle")}
+          </h2>
+          <p className="mb-3 text-sm text-muted-foreground">
+            {t("educationSubtitle")}
+          </p>
+          {programs.length > 0 ? (
+            <ProgramList programs={programs} locale={locale} />
+          ) : (
+            <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+              {t("educationEmpty")}
+            </p>
+          )}
+        </section>
 
         {/* Essential skills: have / missing */}
         {user && (

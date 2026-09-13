@@ -208,7 +208,10 @@
     "targetSet": "Tavoitteena",
     "iscoGroup": "ISCO-ryhmä {group}",
     "description": "Kuvaus",
-    "relatedOccupations": "Mihin tämä taito voi viedä"
+    "relatedOccupations": "Mihin tämä taito voi viedä",
+    "educationTitle": "Tutkinnot, jotka vievät tähän ammattiin",
+    "educationSubtitle": "Suomen ammatilliset tutkinnot (Opetushallituksen ePerusteet)",
+    "educationEmpty": "Tälle ammatille ei löytynyt suoraa suomalaista ammatillista tutkintoa."
   },
   "explore": {
     "occupationsTitle": "Selaa ammatteja",
@@ -244,6 +247,13 @@
     "markPlanned": "Palauta suunnitteille",
     "completedAddsSkill": "Valmistuessaan taito lisätään profiiliisi.",
     "empty": "Oppimislistasi on tyhjä."
+  },
+  "education": {
+    "perustutkinto": "Perustutkinto",
+    "ammattitutkinto": "Ammattitutkinto",
+    "erikoisammattitutkinto": "Erikoisammattitutkinto",
+    "coversSkills": "Kattaa {count} taitoa listaltasi",
+    "searchOpintopolku": "Etsi Opintopolusta"
   },
   "account": {
     "title": "Tili",
