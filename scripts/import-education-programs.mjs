@@ -2,8 +2,25 @@
  * Import Finnish vocational qualifications from ePerusteet (Opetushallitus's
  * public curriculum API, no auth) and link them to ESCO occupations/skills.
  *
- *   node scripts/import-education-programs.mjs                # all ~328
- *   node scripts/import-education-programs.mjs --limit 10      # smoke test
+ *   node scripts/import-education-programs.mjs                 # all ~328
+ *   node scripts/import-education-programs.mjs --limit 10       # smoke test
+ *   node scripts/import-education-programs.mjs --relink-only    # free re-link
+ *
+ * A FULL re-import of the units runs in two passes, because the HNSW index on
+ * education_program_units cannot be in place while 23k vectors are loaded (per
+ * insert graph maintenance times the load out) and must be in place before the
+ * linking step (14,257 sequential scans do not finish). In the SQL editor and
+ * the shell, in this order:
+ *
+ *   drop index if exists idx_epu_embedding_hnsw;
+ *   node scripts/import-education-programs.mjs --skip-link
+ *   create index idx_epu_embedding_hnsw on public.education_program_units
+ *     using hnsw (embedding halfvec_cosine_ops);
+ *   node scripts/import-education-programs.mjs --relink-only
+ *
+ * Embeddings are cached in .cache/unit-embeddings.jsonl as they arrive, so a
+ * failure anywhere after them — and there have been several — costs no quota to
+ * retry. Delete that file to force re-embedding.
  *
  * Idempotent: re-running re-fetches and re-upserts everything (there's no
  * "already done" marker — the whole dataset is small enough, ~328 programs,
@@ -14,15 +31,21 @@
  *     (tutkintonimikkeet, e.g. "Vehicle Mechanic") via trigram similarity
  *     (search_occupations_fuzzy RPC, 0009) — these are short, standardized
  *     labels, already close to ESCO's own naming.
- *   - skills: from each qualification's overall competence summary + job-task
- *     description (Finnish prose) via the existing embedding_fi /
- *     match_skills_semantic infrastructure (0007) — qualification-level
- *     granularity (one combined text per program), not per-unit. Matching
- *     every one of the ~78 units per program down to atomic skill statements
- *     would mean hundreds of thousands of embedding calls for a first pass;
- *     this keeps it a ~11-batch job.
+ *   - skills: each tutkinnon osa is embedded and stored in
+ *     education_program_units, and the link table is then built by asking, for
+ *     every ESCO skill, which osat are nearest to IT (link_skills_to_units,
+ *     0011). The obvious direction — each osa's nearest skills — was tried
+ *     twice and does not work: 42% of skills never enter any osa's candidate
+ *     list while a few enter a third of them. 0011's header has the numbers.
+ *
+ * --relink-only skips the ePerusteet fetch and the embedding entirely and
+ * re-runs just the linking step over the units already stored. Changing
+ * PROGRAMS_PER_SKILL or MIN_SIMILARITY costs nothing that way; a full run
+ * spends ~266 embedding requests of a free-tier quota to arrive at the same
+ * vectors.
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, appendFileSync, mkdirSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 // ---------------------------------------------------------------- env
@@ -61,37 +84,128 @@ const LIMIT = (() => {
   return i >= 0 ? Number(args[i + 1]) : Infinity;
 })();
 
+/**
+ * Re-link from the units already in the database instead of fetching and
+ * embedding them again. The embeddings are the expensive part and they do not
+ * change between runs; the linking parameters are what actually gets tuned, and
+ * a tuning loop that costs a quarter of a day's free quota is a tuning loop
+ * nobody runs enough times to learn anything from.
+ */
+const RELINK_ONLY = args.includes("--relink-only");
+/**
+ * Stop after storing the units, before linking.
+ *
+ * The two halves want opposite things from the HNSW index on
+ * education_program_units: loading 23k vectors wants it GONE (maintaining the
+ * graph per insert is what makes a bulk load time out — the same lesson 0010
+ * learned on skills.embedding_fi), and linking cannot run without it (14,257
+ * sequential scans do not finish). pgvector's own advice is load first, index
+ * after, so the import runs in two passes with the index rebuilt between them.
+ * See the header for the exact sequence.
+ */
+const SKIP_LINK = args.includes("--skip-link");
+
+/**
+ * Embedded texts, cached on disk, keyed by a hash of the text.
+ *
+ * Three runs in a row have now spent the full embedding quota and then died
+ * before the vectors reached Postgres — on a duplicate key, on a stale schema
+ * cache, on a statement timeout. The vectors were correct every time; only the
+ * write failed. Appending each one to a local file as it arrives means the next
+ * attempt costs nothing, and it makes re-running after ANY downstream failure
+ * cheap enough to stop being a reason not to try something.
+ */
+const EMBED_CACHE = ".cache/unit-embeddings.jsonl";
+
 const EPERUSTEET_BASE = "https://eperusteet.opintopolku.fi/eperusteet-service/api/external";
 const VOCATIONAL_TYPES = new Set(["koulutustyyppi_1", "koulutustyyppi_11", "koulutustyyppi_12"]);
 /** Below this, a trigram "match" is more likely noise than a real degree-title correspondence. */
 const OCCUPATION_SIMILARITY_FLOOR = 0.3;
 /**
- * Candidates pulled per program before hub correction, and links kept after.
+ * How many qualifications each skill may point at, and how many osat are looked
+ * at before collapsing them to qualifications.
  *
- * The pool is deliberately much larger than the final cut: the correction below
- * needs to see how widely each skill matches across ALL programs, and it can
- * only see what the pool contains. Both numbers cost nothing extra in NVIDIA
- * quota — the embedding call already happened; this is a wider LIMIT on a
- * Postgres query.
+ * These two are what make hubness structurally impossible rather than merely
+ * penalised: a skill contributes at most PROGRAMS_PER_SKILL links, so no skill
+ * can appear under 170 qualifications however central its vector is. The old
+ * direction had no such ceiling — a hub simply won every pool it entered.
+ *
+ * 8 rather than 3 because a skill is genuinely taught in more than three
+ * trades, and because the page ranks qualifications by how much of their
+ * content the overlap is (0018), not by raw link counts — so the extra recall
+ * is sorted out at read time rather than showing up as noise. At 3, two of the
+ * five electrical skills checked by hand never reached the electrical
+ * qualification at all.
+ *
+ * UNIT_PROBE is larger than PROGRAMS_PER_SKILL because a skill's nearest osat
+ * are frequently several osat of the SAME qualification (a qualification
+ * teaching cable work has several units about cable work). Probing 40 and then
+ * collapsing leaves room for three DISTINCT qualifications to survive.
  */
-const CANDIDATE_POOL = 50;
-const SKILLS_PER_PROGRAM = 10;
+const numArg = (flag, fallback) => {
+  const i = args.indexOf(flag);
+  return i >= 0 && args[i + 1] !== undefined ? Number(args[i + 1]) : fallback;
+};
+// Overridable from the command line, because with the index in memory a full
+// re-link takes under a minute and these are the numbers actually worth trying
+// several values of: `--relink-only --k 8 --min-sim 0.45`.
+const PROGRAMS_PER_SKILL = numArg("--k", 8);
+const UNIT_PROBE = numArg("--probe", 40);
 /**
- * How hard to penalise a skill for being close to many programs. 0 disables the
- * correction. Weight 1 (the skill's plain cross-program mean) turned out to be
- * too weak to matter: the penalty spread between a hub and a specialised skill
- * is only ~0.025, against a ~0.18 spread of similarities inside one program's
- * pool, so it only ever reordered near-ties. 3 puts the two on comparable
- * footing. Lower it if specialised qualifications start losing their obvious
- * matches; raise it if hub skills still dominate the frequency counts.
+ * Cosine floor below which a skill's best osa is not a match at all.
  *
- * The knob has a ceiling, though: it penalises breadth, and it cannot tell
- * spurious breadth ("huoltaa jalkineiden kokoonpanovälineitä" in 24 unrelated
- * programs) from real breadth ("ohjata ryhmätyötä", which genuinely does span
- * trades). Pushing it far enough to kill the former will start eating the
- * latter. Past that point the fix is better query text, not a bigger weight.
+ * Every skill gets a nearest osa whether or not it has anything to do with
+ * Finnish vocational education — ESCO carries neuroanatomy and Estonian
+ * comprehension, and no tutkinto teaches either. The floor is what keeps those
+ * out. 0.40 sits below the 0.5-0.8 band of the matches that were checked by
+ * hand and above the ~0.38 where unrelated Finnish text starts scoring.
  */
-const HUB_PENALTY = 3.0;
+const MIN_SIMILARITY = numArg("--min-sim", 0.4);
+/**
+ * Added to a candidate's score when a unit names the skill outright (0016).
+ *
+ * A bonus rather than an override: a rare term is strong evidence, not proof,
+ * and a qualification should still have to beat the others. 0.25 is roughly
+ * twice the spread between the top candidates of a typical skill, so a lexical
+ * hit reliably outranks a near-tie without erasing a much stronger vector match.
+ */
+const LEX_BONUS = numArg("--lex-bonus", 0.25);
+/**
+ * Skills per link_skills_to_units call, and the floor it may back off to.
+ *
+ * A vector lookup is 1.9 ms once the index fits in memory (0013), but the
+ * lexical arm added in 0016 costs far more and varies per skill — a trigram
+ * bitmap scan measured 119 ms cold for two prefixes, and skills carry up to
+ * three. That put 500 right on the statement-timeout boundary: the same batch
+ * size succeeded one minute and failed the next, which is the worst place to
+ * sit. So the loop halves the batch and retries when it sees a timeout instead
+ * of dying, and starts low enough that it rarely needs to.
+ */
+const SKILL_BATCH = numArg("--batch", 200);
+const MIN_SKILL_BATCH = 25;
+/**
+ * Dimensions actually stored in Postgres, out of the model's 2048.
+ *
+ * The model is Matryoshka-trained, so the first 512 dimensions are a usable
+ * embedding on their own — scripts/probe-truncation.mjs measures recall@20 of
+ * 0.866 against the full vector, at a quarter of the distance cost. 0013 has
+ * the reasoning and the rest of the table.
+ *
+ * The FULL vectors stay in .cache/unit-embeddings.jsonl, so changing this
+ * number is a re-upload, not a re-embedding.
+ */
+const STORE_DIMS = 512;
+/**
+ * Requirements per embedded chunk, and the character cap on one.
+ *
+ * A <b> group in ePerusteet is usually 4-12 requirements; the cap only splits
+ * the unusually long ones. Both numbers trade specificity against context: one
+ * requirement per vector would match individual ESCO skills most sharply but
+ * strips the surrounding trade ("rakentaa johtotiet" alone could be roading),
+ * while a whole osa is the 3,000-character blob this replaces.
+ */
+const ITEMS_PER_CHUNK = 8;
+const CHUNK_CHARS = 2000;
 const EMBED_BATCH = 32;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -143,89 +257,6 @@ async function clearLinks(table, programIds, column = "program_id") {
 }
 
 /**
- * Re-rank each program's candidate pool so that skills which match EVERYTHING
- * stop winning, and keep the top SKILLS_PER_PROGRAM of what survives.
- *
- * The problem this solves, measured on the first full import: a handful of very
- * specific ESCO skills ("huoltaa jalkineiden kokoonpanovälineitä" — maintain
- * footwear assembly tools) were linked to 40-75 of the 328 qualifications, and
- * not as filler at the bottom of the list — several ranked FIRST for some
- * program. Neither a similarity floor nor a rank cut removes them, because the
- * problem is that they genuinely score high against almost any query.
- *
- * That is hubness: in a high-dimensional embedding space some points sit close
- * to the centre of the distribution and therefore turn up among the nearest
- * neighbours of a disproportionate share of queries, regardless of meaning. It
- * bites hardest here because the query is a long prose qualification summary,
- * whose vector lands near the average of all Finnish vocational text — and the
- * nearest neighbours of an average vector are hubs, not matches.
- *
- * The correction is CSLS (cross-domain similarity local scaling), reduced to
- * what a batch import can do for free: every program's candidates are already
- * in hand, so each skill's mean similarity ACROSS PROGRAMS is computable
- * without another API call. Score each pairing by
- *
- *     similarity(program, skill) - HUB_PENALTY * mean similarity(skill, ALL
- *     programs, absences imputed at the pool cut-off)
- *
- * A skill that is close to everything carries a large penalty; one that is
- * close to only a few programs carries almost none, so genuinely specific
- * matches rise and hubs fall. The penalty is estimated from the candidate
- * pools, not the whole 14k-row table — a skill absent from every pool is not
- * a hub by definition, so its unseen mean cannot change the ranking.
- *
- * The stored `similarity` stays the raw cosine: it is what the column
- * documents, and the corrected score is a ranking device, not a measure of
- * how close the two texts actually are.
- */
-function correctForHubs(pools) {
-  const programCount = pools.size;
-  if (programCount === 0) return [];
-
-  // A skill missing from a program's pool did not score zero there — it scored
-  // somewhere below that pool's cut-off. Averaging only over the pools a skill
-  // DOES appear in silently averages over its best matches, which inverts the
-  // whole correction: a specialised skill matching three programs at 0.62 ends
-  // up penalised harder than a hub matching a hundred at 0.52. So absences are
-  // imputed at the mean cut-off and the mean is taken over EVERY program, which
-  // is what makes breadth itself the thing being penalised.
-  let cutoffSum = 0;
-  for (const candidates of pools.values()) {
-    cutoffSum += candidates.length ? candidates[candidates.length - 1].similarity : 0;
-  }
-  const impliedFloor = cutoffSum / programCount;
-
-  const stats = new Map(); // skill_uri -> { sum, n }
-  for (const candidates of pools.values()) {
-    for (const c of candidates) {
-      const stat = stats.get(c.skill_uri) ?? { sum: 0, n: 0 };
-      stat.sum += c.similarity;
-      stat.n += 1;
-      stats.set(c.skill_uri, stat);
-    }
-  }
-
-  const penalty = new Map();
-  for (const [uri, stat] of stats) {
-    const imputed = stat.sum + (programCount - stat.n) * impliedFloor;
-    penalty.set(uri, imputed / programCount);
-  }
-
-  const links = [];
-  for (const [programId, candidates] of pools) {
-    const scored = candidates.map((c) => ({
-      ...c,
-      adjusted: c.similarity - HUB_PENALTY * penalty.get(c.skill_uri),
-    }));
-    scored.sort((a, b) => b.adjusted - a.adjusted);
-    for (const c of scored.slice(0, SKILLS_PER_PROGRAM)) {
-      links.push({ program_id: programId, skill_uri: c.skill_uri, similarity: c.similarity });
-    }
-  }
-  return dedupeByKey(links, (l) => `${l.program_id}\u0000${l.skill_uri}`);
-}
-
-/**
  * Collapse rows sharing a composite primary key, keeping the strongest match.
  *
  * Needed because Postgres refuses an upsert whose batch names the same
@@ -269,6 +300,114 @@ function assertUniqueKeys(rows, key, table) {
   die(`${table}: duplicate primary keys survived dedupe (see above)`);
 }
 
+/**
+ * The units of a qualification, each as one embeddable text.
+ *
+ * Matching one summary per qualification was too coarse to be useful: the
+ * summary is written in institutional abstractions ("osaa toimia turvallisesti
+ * sahkoasennuksia sisaltavissa tyotehtavissa"), so the ESCO skills it retrieved
+ * were abstractions too. Measured on a real learning list, 28 of 30 concrete
+ * electrician skills — fitting sockets, joining cables, testing equipment —
+ * had no qualification linked at all.
+ *
+ * A tutkinnon osa is where the concrete work is written down. Embedding at that
+ * level costs about 7,200 texts across all qualifications (~225 requests),
+ * against ~72,000 for every individual requirement line, and each osa is still
+ * a single coherent topic rather than a whole trade.
+ */
+async function fetchOsaTexts(perusteId) {
+  let body;
+  try {
+    body = await fetchJson(`${EPERUSTEET_BASE}/peruste/${perusteId}/tutkinnonosat`);
+  } catch {
+    return [];
+  }
+  const arr = Array.isArray(body) ? body : body.data ?? [];
+  const out = [];
+  for (const osa of arr) {
+    // osa_id identifies the unit within its qualification, so a unit without
+    // one cannot be stored idempotently and is skipped rather than duplicated.
+    const id = osa.id ?? osa.osaId ?? null;
+    if (id == null) continue;
+    const title = osa.nimi?.fi ?? "";
+    for (const chunk of osaChunks(osa.ammattitaitovaatimukset?.fi, title)) {
+      out.push({ id, title, ...chunk });
+    }
+  }
+  return out;
+}
+
+/**
+ * Split one osa's ammattitaitovaatimukset into embeddable requirement groups.
+ *
+ * ePerusteet writes them as a <b> heading followed by the requirements that sit
+ * under it, repeated for each area of competence:
+ *
+ *   <b>Opiskelija tekee pien- ja pienoisjännitesähköasennukset</b>
+ *     <dd style="display: list-item;">toteuttaa ... pistorasioiden kytkennät</dd>
+ *     <dd style="display: list-item;">rakentaa johtotiet</dd>
+ *
+ * so the headings are the boundaries and no heuristic is needed to find them.
+ * Each group carries the osa title as well, because a heading on its own
+ * ("Opiskelija valmistautuu asennuksiin") says nothing about which trade.
+ *
+ * Note the <dd>: this document type uses a definition list styled as a bulleted
+ * one and contains no <li> at all. Looking only for <li>, as this function did
+ * originally, silently produced one unsplit blob per osa — which is how the
+ * perustutkinto ended up with 7 skills against its ammattitutkinto's 198.
+ */
+function osaChunks(html, title) {
+  if (!html) return [];
+
+  const groups = [];
+  // Splitting on the opening tag keeps each heading with the items that follow
+  // it; parts[0] is whatever precedes the first heading, usually nothing.
+  const parts = html.split(/<b[^>]*>/i);
+  for (const part of parts.slice(1)) {
+    const close = part.search(/<\/b>/i);
+    const heading = close >= 0 ? stripHtml(part.slice(0, close)) : "";
+    const items = listItems(close >= 0 ? part.slice(close + 4) : part);
+    if (heading || items.length) groups.push({ heading, items });
+  }
+
+  // Documents that use no headings at all still have to yield something: their
+  // items, or failing that the whole stripped text as one group.
+  if (groups.length === 0) {
+    const items = listItems(html);
+    const whole = stripHtml(html);
+    if (items.length) groups.push({ heading: "", items });
+    else if (whole) groups.push({ heading: "", items: [whole] });
+  }
+
+  const chunks = [];
+  for (const g of groups) {
+    // A group longer than ITEMS_PER_CHUNK is split further rather than
+    // truncated — losing the tail of a long group loses exactly the specific
+    // requirements this whole change exists to expose.
+    const slices = g.items.length ? [] : [[]];
+    for (let i = 0; i < g.items.length; i += ITEMS_PER_CHUNK) {
+      slices.push(g.items.slice(i, i + ITEMS_PER_CHUNK));
+    }
+    for (const slice of slices) {
+      const text = [title, g.heading, ...slice].filter(Boolean).join("\n").slice(0, CHUNK_CHARS);
+      if (text.length > 20) chunks.push({ heading: g.heading, text });
+    }
+  }
+  return chunks.map((c, i) => ({ ...c, chunkIndex: i }));
+}
+
+/**
+ * The individual requirements inside a group. Both markups appear across
+ * ePerusteet's document types — <dd> in the vocational qualifications read so
+ * far, <li> elsewhere — and matching either costs nothing.
+ */
+function listItems(html) {
+  if (!html) return [];
+  return [...html.matchAll(/<(dd|li)[^>]*>([\s\S]*?)<\/\1>/gi)]
+    .map((m) => stripHtml(m[2]))
+    .filter((t) => t.length > 3);
+}
+
 /** Strips the light HTML (<p>, <dl>, <b>, etc.) ePerusteet embeds in rich-text fields. */
 function stripHtml(html) {
   if (!html) return "";
@@ -279,8 +418,215 @@ function stripHtml(html) {
     .trim();
 }
 
+
+/**
+ * Embed every tutkinnon osa and store it, vector included, in
+ * education_program_units.
+ *
+ * The vectors are kept rather than consumed because the linking query runs
+ * inside Postgres, next to the skill vectors — 14,257 nearest-neighbour lookups
+ * is not something to route through this script one HTTP request at a time.
+ * Keeping them also makes --relink-only possible.
+ */
+/** Load the on-disk embedding cache: text hash -> pgvector literal. */
+function loadEmbedCache() {
+  const cache = new Map();
+  if (!existsSync(EMBED_CACHE)) return cache;
+  for (const line of readFileSync(EMBED_CACHE, "utf8").split("\n")) {
+    if (!line) continue;
+    try {
+      const { h, v } = JSON.parse(line);
+      // float32 as base64 rather than a JSON array of 2048 numbers: about a
+      // tenth the bytes, and this file holds ~11k of them.
+      const buf = Buffer.from(v, "base64");
+      const f = new Float32Array(buf.buffer, buf.byteOffset, buf.length / 4);
+      cache.set(h, `[${f.subarray(0, STORE_DIMS).join(",")}]`);
+    } catch {
+      // A half-written last line after a kill is expected; skip it.
+    }
+  }
+  return cache;
+}
+
+const hashOf = (text) => createHash("sha1").update(text).digest("hex");
+
+async function storeUnits(units) {
+  // One row per (programme, unit, chunk), deduped on exactly the key the table
+  // is unique on — Postgres refuses an upsert batch naming the same conflict
+  // target twice, and the same osa occasionally appears twice in a peruste.
+  const rows = new Map();
+  for (const u of units) {
+    rows.set(`${u.programId}::${u.osaId}::${u.chunkIndex}`, {
+      osa_id: u.osaId,
+      program_id: u.programId,
+      chunk_index: u.chunkIndex,
+      title_fi: u.title,
+      heading: u.heading,
+      body: u.text,
+    });
+  }
+  if (rows.size < units.length) {
+    console.log(`  ${units.length - rows.size} repeated (programme, unit, chunk) row(s) collapsed`);
+  }
+
+  // ePerusteet's yhteiset tutkinnon osat are shared records, so the same
+  // requirement group arrives under dozens of qualifications. Each distinct
+  // text is embedded once and its vector attached to every row carrying it.
+  const byText = new Map();
+  for (const row of rows.values()) {
+    const list = byText.get(row.body) ?? [];
+    list.push(row);
+    byText.set(row.body, list);
+  }
+  const texts = [...byText.keys()];
+
+  const cache = loadEmbedCache();
+  const missing = texts.filter((t) => !cache.has(hashOf(t)));
+  console.log(
+    `\n  ${rows.size} row(s), ${texts.length} distinct requirement group(s), ` +
+      `${texts.length - missing.length} already embedded`
+  );
+  if (missing.length) console.log(`  Embedding ${missing.length} new group(s)...`);
+
+  mkdirSync(".cache", { recursive: true });
+  for (let i = 0; i < missing.length; i += EMBED_BATCH) {
+    const batch = missing.slice(i, i + EMBED_BATCH);
+    const res = await fetch(`${NVIDIA_BASE_URL}/embeddings`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${NVIDIA_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: EMBED_MODEL,
+        input: batch,
+        input_type: "passage",
+        encoding_format: "float",
+        truncate: "END",
+      }),
+    });
+    if (!res.ok) die(`embeddings ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    const json = await res.json();
+
+    // Appended before anything else can fail. This line is the whole point of
+    // the cache: whatever happens next, this batch is never paid for twice.
+    let lines = "";
+    for (const row of json.data) {
+      const text = batch[row.index];
+      const f = new Float32Array(row.embedding);
+      // The cache keeps every dimension; only the database gets the truncation.
+      lines += JSON.stringify({ h: hashOf(text), v: Buffer.from(f.buffer).toString("base64") }) + "\n";
+      cache.set(hashOf(text), `[${row.embedding.slice(0, STORE_DIMS).join(",")}]`);
+    }
+    appendFileSync(EMBED_CACHE, lines);
+
+    if (i % (EMBED_BATCH * 20) === 0 || i + EMBED_BATCH >= missing.length) {
+      console.log(`    embedded ${Math.min(i + EMBED_BATCH, missing.length)} / ${missing.length}`);
+    }
+    if (i + EMBED_BATCH < missing.length) await sleep(1800);
+  }
+
+  console.log(`  Storing ${rows.size} unit row(s)...`);
+  const list = [...rows.values()].map((r) => ({ ...r, embedding: cache.get(hashOf(r.body)) }));
+  // 100 at a time: each row carries a 512-dimension vector serialised as text,
+  // so the request body, not the row count, is what caps the batch.
+  for (let i = 0; i < list.length; i += 100) {
+    const { error } = await db
+      .from("education_program_units")
+      .upsert(list.slice(i, i + 100), { onConflict: "program_id,osa_id,chunk_index" });
+    if (error) {
+      die(
+        `education_program_units upsert failed after ${i} row(s): ${error.message}` +
+          (error.message.includes("timeout")
+            ? "\n  The HNSW index is probably still in place. Drop it, re-run with " +
+              "--skip-link, rebuild it, then run --relink-only (see the header)."
+            : "\n  The embeddings are cached, so re-running costs no quota.")
+      );
+    }
+    if (i % 2000 === 0 || i + 100 >= list.length) {
+      console.log(`    ${Math.min(i + 100, list.length)} / ${list.length} stored`);
+    }
+  }
+  return list.length;
+}
+
+/**
+ * Build education_program_skills by walking every embedded ESCO skill and
+ * asking which tutkinnon osat are nearest to it.
+ *
+ * Batched because 14,257 nearest-neighbour lookups in a single statement is the
+ * shape that hit the statement timeout in 0010; each call is sized to finish
+ * comfortably and the loop just advances an offset.
+ */
+async function linkSkills() {
+  const { count: total, error: countErr } = await db
+    .from("skill_query_embeddings")
+    .select("concept_uri", { count: "exact", head: true });
+  if (countErr) die(`counting skill query vectors failed: ${countErr.message}`);
+  if (!total) {
+    die(
+      "skill_query_embeddings is empty.\n" +
+        "  Run scripts/backfill-skill-query-embeddings.mjs, then scripts/build-skill-anchors.mjs."
+    );
+  }
+
+  console.log(
+    `\n  Linking ${total} embedded skill(s) to their nearest tutkinnon osat ` +
+      `(k=${PROGRAMS_PER_SKILL}, min-sim=${MIN_SIMILARITY}, probe=${UNIT_PROBE}, ` +
+      `lex-bonus=${LEX_BONUS})...`
+  );
+  let written = 0;
+  let batch = Math.max(SKILL_BATCH, MIN_SKILL_BATCH);
+  let offset = 0;
+  while (offset < total) {
+    const { data, error } = await db.rpc("link_skills_to_units", {
+      p_k: PROGRAMS_PER_SKILL,
+      p_min_similarity: MIN_SIMILARITY,
+      p_offset: offset,
+      p_limit: batch,
+      p_probe: UNIT_PROBE,
+      p_lex_bonus: LEX_BONUS,
+    });
+
+    if (error) {
+      // A timeout means this batch asked for more than one statement's worth of
+      // work, not that anything is broken — halve it and ask again from the
+      // same offset. Nothing was written, so there is nothing to undo.
+      if (/timeout/i.test(error.message) && batch > MIN_SKILL_BATCH) {
+        batch = Math.max(MIN_SKILL_BATCH, Math.floor(batch / 2));
+        console.log(`    timed out at offset ${offset} — retrying with batch ${batch}`);
+        continue;
+      }
+      die(`link_skills_to_units failed at offset ${offset} (batch ${batch}): ${error.message}`);
+    }
+
+    written += data ?? 0;
+    offset += batch;
+    console.log(`    ${Math.min(offset, total)} / ${total} skill(s), ${written} link(s)`);
+  }
+  return written;
+}
+
 // ---------------------------------------------------------------- main
 async function main() {
+  if (RELINK_ONLY) {
+    const { count, error } = await db
+      .from("education_program_units")
+      .select("id", { count: "exact", head: true })
+      .not("embedding", "is", null);
+    if (error) die(`reading education_program_units failed: ${error.message}`);
+    if (!count) {
+      die(
+        "no embedded tutkinnon osat stored yet.\n  Run once without --relink-only to " +
+          "fetch and embed them; every re-link after that is free."
+      );
+    }
+    console.log(`\n  Re-linking from ${count} stored tutkinnon osa(t) — no fetch, no embedding.`);
+    const { data: ids, error: idErr } = await db.from("education_programs").select("id");
+    if (idErr) die(`reading education_programs failed: ${idErr.message}`);
+    await clearLinks("education_program_skills", (ids ?? []).map((r) => r.id));
+    const written = await linkSkills();
+    console.log(`\n  Done. ${written} skill link(s) from ${count} osa(t).\n`);
+    return;
+  }
+
   console.log("\n  Fetching vocational qualification list...");
   const list = await fetchVocationalList().then((l) => l.slice(0, LIMIT));
   console.log(`  ${list.length} vocational qualification(s) to import\n`);
@@ -291,14 +637,7 @@ async function main() {
     const titles = (detail.tutkintonimikkeet ?? [])
       .map((t) => ({ en: t.nimi?.en, fi: t.nimi?.fi }))
       .filter((t) => t.en || t.fi);
-    const skillText = [
-      detail.nimi?.fi,
-      stripHtml(detail.tyotehtavatJoissaVoiToimia?.fi),
-      stripHtml(detail.suorittaneenOsaaminen?.fi),
-    ]
-      .filter(Boolean)
-      .join("\n")
-      .slice(0, 3000);
+    const osaTexts = await fetchOsaTexts(entry.id);
 
     programs.push({
       id: entry.id,
@@ -308,10 +647,14 @@ async function main() {
       name_sv: entry.nimi.sv ?? null,
       diaarinumero: entry.diaarinumero ?? null,
       titles,
-      skillText,
+      osaTexts,
     });
 
-    console.log(`  ${String(i + 1).padStart(4)} / ${list.length}  ${entry.nimi.fi}`);
+    // One line per qualification is 328 lines of noise that hides the counts
+    // the run is actually judged on; every 25th is enough to see it is alive.
+    if ((i + 1) % 25 === 0 || i + 1 === list.length) {
+      console.log(`  ${String(i + 1).padStart(4)} / ${list.length}  ${entry.nimi.fi}`);
+    }
     await sleep(150);
   }
 
@@ -371,60 +714,46 @@ async function main() {
     if (error) die(`education_program_occupations upsert failed (slice ${i}-${i + 500}): ${error.message}`);
   }
 
-  // ---- skill matching (embeddings, batched to conserve NVIDIA quota) ----
-  console.log("\n  Embedding qualification competence summaries...");
-  const embeddable = programs.filter((p) => p.skillText.length > 0);
-  const vectors = new Map();
-  for (let i = 0; i < embeddable.length; i += EMBED_BATCH) {
-    const batch = embeddable.slice(i, i + EMBED_BATCH);
-    const res = await fetch(`${NVIDIA_BASE_URL}/embeddings`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${NVIDIA_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: EMBED_MODEL,
-        input: batch.map((p) => p.skillText),
-        input_type: "passage",
-        encoding_format: "float",
-        truncate: "END",
-      }),
-    });
-    if (!res.ok) die(`embeddings ${res.status}: ${(await res.text()).slice(0, 300)}`);
-    const json = await res.json();
-    for (const row of json.data) vectors.set(batch[row.index].id, row.embedding);
-    console.log(`    ${Math.min(i + EMBED_BATCH, embeddable.length)} / ${embeddable.length}`);
-    if (i + EMBED_BATCH < embeddable.length) await sleep(1800);
+  // ---- skill matching, one text per tutkinnon osa ----
+  const units = [];
+  for (const p of programs) {
+    for (const chunk of p.osaTexts) {
+      units.push({
+        programId: p.id,
+        osaId: chunk.id,
+        chunkIndex: chunk.chunkIndex,
+        title: chunk.title,
+        heading: chunk.heading,
+        text: chunk.text,
+      });
+    }
   }
 
-  console.log("\n  Matching competence summaries to ESCO skills...");
-  const pools = new Map(); // program id -> [{ skill_uri, similarity }]
-  for (const p of embeddable) {
-    const vector = vectors.get(p.id);
-    if (!vector) continue;
-    const { data, error } = await db.rpc("match_skills_semantic", {
-      p_embedding: `[${vector.join(",")}]`,
-      p_limit: CANDIDATE_POOL,
-      p_min_similarity: 0,
-    });
-    if (error) { console.log(`    RPC error for program ${p.id}: ${error.message}`); continue; }
-    pools.set(
-      p.id,
-      (data ?? []).map((s) => ({ skill_uri: s.concept_uri, similarity: s.similarity }))
+  // Wholesale, like everything else here: a unit dropped or renumbered upstream
+  // would otherwise linger with a stale vector and keep winning matches.
+  await clearLinks("education_program_units", programs.map((p) => p.id));
+  const storedUnits = await storeUnits(units);
+
+  if (SKIP_LINK) {
+    console.log(
+      `\n  Done. ${programs.length} program(s), ${occLinks.length} occupation link(s), ` +
+        `${storedUnits} requirement group(s) stored.\n\n` +
+        "  Next: rebuild the vector index, then link.\n" +
+        "    create index idx_epu_embedding_hnsw on public.education_program_units\n" +
+        "      using hnsw (embedding halfvec_cosine_ops);\n" +
+        "    node scripts/import-education-programs.mjs --relink-only\n"
     );
+    return;
   }
 
-  let skillLinks = correctForHubs(pools);
-  console.log(`  ${skillLinks.length} program-skill link(s) after hub correction`);
-  assertUniqueKeys(skillLinks, (l) => `${l.program_id}\u0000${l.skill_uri}`, "education_program_skills");
   await clearLinks("education_program_skills", programs.map((p) => p.id));
-  for (let i = 0; i < skillLinks.length; i += 500) {
-    const { error } = await db
-      .from("education_program_skills")
-      .upsert(skillLinks.slice(i, i + 500), { onConflict: "program_id,skill_uri" });
-    if (error) die(`education_program_skills upsert failed: ${error.message}`);
-  }
+  const skillLinkCount = await linkSkills();
+  console.log(
+    `  ${skillLinkCount} program-skill link(s) from ${storedUnits} requirement group(s)`
+  );
 
   console.log(
-    `\n  Done. ${programs.length} program(s), ${occLinks.length} occupation link(s), ${skillLinks.length} skill link(s).\n`
+    `\n  Done. ${programs.length} program(s), ${occLinks.length} occupation link(s), ${skillLinkCount} skill link(s).\n`
   );
 }
 

@@ -99,27 +99,54 @@ export async function getProgramsForOccupation(
  * How many of the asked-about skills a qualification must cover to be worth
  * showing.
  *
- * One is not a signal. Measured across every ESCO occupation, 1383 of the 2080
- * occupations with any overlap at all had a best qualification covering exactly
- * one essential skill, and the results read as random: a train conductor was
- * offered sports-facility management and property management, each on a single
- * shared skill. An empty section is less damaging than a list that looks broken.
+ * One is not a signal. Measured when qualifications carried ten linked skills
+ * each, 1383 of the 2080 occupations with any overlap at all had a best
+ * qualification covering exactly one essential skill, and those results read as
+ * random: a train conductor was offered sports-facility management and property
+ * management, each on one shared skill. An empty section is less damaging than
+ * a list that looks broken.
  *
- * Two independent hits is a much weaker coincidence, and cuts the fallback from
- * 2080 occupations to 697. That is the right trade for now, but it is treating
- * a symptom: qualifications carry only 10 linked skills each (see the hub
- * correction in scripts/import-education-programs.mjs), so overlaps larger than
- * two are rare by construction. Matching at tutkinnon osa level instead of one
- * summary per qualification would raise the skill count per qualification and
- * let this threshold rise with it.
+ * Qualifications now carry a few hundred linked skills rather than ten, so this
+ * threshold is far easier to clear than it was and is no longer doing much of
+ * the filtering — the score below is. Worth re-measuring against the current
+ * link table before trusting it to exclude anything.
  */
 const MIN_COVERED_SKILLS = 2;
 
 /**
+ * Below this many linked skills, a qualification is not ranked at all.
+ *
+ * Not because narrow qualifications are bad matches, but because a
+ * qualification with a dozen links is under-linked rather than narrow — an
+ * artefact of the matching, not a property of the degree — and the score below
+ * divides by that number. Ruokapalvelujen ammattitutkinto, with 12 links,
+ * scored 5²/12 = 2.08 for kokki and beat Ravintola- ja catering-alan
+ * perustutkinto's 8²/525, which is the qualification an aspiring cook actually
+ * takes. 49 of 328 qualifications sit below this line; the rest have hundreds.
+ */
+const MIN_PROGRAM_SKILLS = 50;
+
+/**
+ * How well a qualification answers a set of skills: covered² / its total size.
+ *
+ * Coverage counts twice over, breadth divides out. Ranking on raw coverage
+ * alone hands the top spot to whichever qualification is broadest — marine
+ * studies, with 1,002 linked skills, came first for sähköasentaja on 7 shared
+ * skills, ahead of the electrical qualification's 5, and second for bus driver.
+ * Normalising puts the right qualification first for all five occupations
+ * tested by hand, where raw coverage managed four. 0018 has the measurements.
+ */
+const coverageScore = (covered: number, programSize: number) =>
+  programSize > 0 ? (covered * covered) / programSize : 0;
+
+/**
  * Qualifications that cover the given skills: the gap-to-training bridge.
- * Ranked by how many of the asked-about skills a qualification covers before
- * how closely it covers any one of them, because "covers 4 of your 6 gaps" is
- * more useful than "covers 1, but very closely".
+ *
+ * Ranked by coverageScore rather than by raw overlap, so that "covers 5 of your
+ * gaps out of the 129 things it teaches" beats "covers 7 out of 1,002" — and
+ * both beat "covers 1, but very closely". How many gaps a qualification closes
+ * is what the page shows; how much of the qualification those gaps are is what
+ * decides the order.
  */
 export async function getProgramsForSkills(
   skillUris: string[],
@@ -155,6 +182,20 @@ export async function getProgramsForSkills(
       }
     }
 
+    // How big each candidate is, so breadth can be divided out below. One extra
+    // round trip over a view, for the candidates only — never the whole table.
+    const sizes = new Map<number, number>();
+    const candidateIds = Array.from(byProgram.keys());
+    if (candidateIds.length > 0) {
+      const { data: sizeRows } = await supabase
+        .from("education_program_sizes")
+        .select("program_id, skill_count")
+        .in("program_id", candidateIds);
+      for (const r of sizeRows ?? []) {
+        sizes.set(Number((r as Row).program_id), Number((r as Row).skill_count ?? 0));
+      }
+    }
+
     const matches: ProgramMatch[] = Array.from(byProgram.values()).map((m) => ({
       id: m.id,
       koulutustyyppi: m.koulutustyyppi,
@@ -163,11 +204,22 @@ export async function getProgramsForSkills(
       similarity: m.similarity,
       coveredSkills: m.seen.size,
     }));
+
+    const scoreOf = (m: ProgramMatch) => {
+      const size = sizes.get(m.id) ?? 0;
+      // An under-linked qualification would score absurdly well on a tiny
+      // denominator, so it is excluded rather than divided by.
+      if (size < MIN_PROGRAM_SKILLS) return -1;
+      return coverageScore(m.coveredSkills ?? 0, size);
+    };
+
     return dedupeVersions(matches)
-      .filter((m) => (m.coveredSkills ?? 0) >= minCoveredSkills)
+      .filter((m) => (m.coveredSkills ?? 0) >= minCoveredSkills && scoreOf(m) > 0)
       .sort(
         (a, b) =>
-          (b.coveredSkills ?? 0) - (a.coveredSkills ?? 0) || b.similarity - a.similarity
+          scoreOf(b) - scoreOf(a) ||
+          (b.coveredSkills ?? 0) - (a.coveredSkills ?? 0) ||
+          b.similarity - a.similarity
       )
       .slice(0, limit);
   } catch {
