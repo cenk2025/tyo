@@ -259,7 +259,16 @@
     "erikoisammattitutkinto": "Specialist vocational qualification",
     "coversSkills": "Covers {count} skills from your list",
     "searchOpintopolku": "Search on Opintopolku",
-    "coversOccupationSkills": "Covers {count} of this occupation's essential skills"
+    "coversOccupationSkills": "Covers {count} of this occupation's essential skills",
+    "pageSubtitle": "Finnish vocational qualification (ePerusteet, Finnish National Agency for Education)",
+    "skillsTitle": "ESCO skills linked to this qualification",
+    "skillsNote": "These skills were linked automatically by comparing the qualification's description to the EU ESCO classification. They are not the official list of what the qualification contains.",
+    "skillsEmpty": "No skills have been linked to this qualification.",
+    "youHaveIt": "You already have this",
+    "occupationsTitle": "Occupations this qualification leads to",
+    "occupationsNote": "Based on the qualification's official degree titles.",
+    "occupationsEmpty": "No degree titles are recorded for this qualification.",
+    "officialSource": "See the official content in ePerusteet"
   },
   "account": {
     "title": "Account",

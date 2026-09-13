@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { GraduationCap, ExternalLink } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import type { ProgramMatch } from "@/lib/education/types";
 
@@ -70,7 +71,12 @@ export async function ProgramList({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <GraduationCap className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="font-medium">{p.label}</span>
+                <Link
+                  href={`/education/${p.id}`}
+                  className="font-medium hover:underline"
+                >
+                  {p.label}
+                </Link>
                 {level && <Badge variant="muted">{t(level)}</Badge>}
               </div>
               {p.coveredSkills != null && p.coveredSkills > 0 && (

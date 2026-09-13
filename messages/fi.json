@@ -259,7 +259,16 @@
     "erikoisammattitutkinto": "Erikoisammattitutkinto",
     "coversSkills": "Kattaa {count} taitoa listaltasi",
     "searchOpintopolku": "Etsi Opintopolusta",
-    "coversOccupationSkills": "Kattaa {count} tämän ammatin ydintaitoa"
+    "coversOccupationSkills": "Kattaa {count} tämän ammatin ydintaitoa",
+    "pageSubtitle": "Suomen ammatillinen tutkinto (Opetushallituksen ePerusteet)",
+    "skillsTitle": "Tutkintoon liitetyt ESCO-taidot",
+    "skillsNote": "Nämä taidot on yhdistetty tutkintoon automaattisesti vertaamalla tutkinnon kuvausta EU:n ESCO-luokitukseen. Ne eivät ole Opetushallituksen virallinen luettelo tutkinnon sisällöstä.",
+    "skillsEmpty": "Tähän tutkintoon ei ole liitetty taitoja.",
+    "youHaveIt": "Sinulla on jo",
+    "occupationsTitle": "Ammatit, joihin tämä tutkinto vie",
+    "occupationsNote": "Perustuu tutkinnon virallisiin tutkintonimikkeisiin.",
+    "occupationsEmpty": "Tutkinnolle ei ole kirjattu tutkintonimikkeitä, joista ammatti tunnistettaisiin.",
+    "officialSource": "Katso tutkinnon virallinen sisältö ePerusteista"
   },
   "account": {
     "title": "Tili",
