@@ -96,6 +96,26 @@ export async function getProgramsForOccupation(
 }
 
 /**
+ * How many of the asked-about skills a qualification must cover to be worth
+ * showing.
+ *
+ * One is not a signal. Measured across every ESCO occupation, 1383 of the 2080
+ * occupations with any overlap at all had a best qualification covering exactly
+ * one essential skill, and the results read as random: a train conductor was
+ * offered sports-facility management and property management, each on a single
+ * shared skill. An empty section is less damaging than a list that looks broken.
+ *
+ * Two independent hits is a much weaker coincidence, and cuts the fallback from
+ * 2080 occupations to 697. That is the right trade for now, but it is treating
+ * a symptom: qualifications carry only 10 linked skills each (see the hub
+ * correction in scripts/import-education-programs.mjs), so overlaps larger than
+ * two are rare by construction. Matching at tutkinnon osa level instead of one
+ * summary per qualification would raise the skill count per qualification and
+ * let this threshold rise with it.
+ */
+const MIN_COVERED_SKILLS = 2;
+
+/**
  * Qualifications that cover the given skills: the gap-to-training bridge.
  * Ranked by how many of the asked-about skills a qualification covers before
  * how closely it covers any one of them, because "covers 4 of your 6 gaps" is
@@ -104,7 +124,8 @@ export async function getProgramsForOccupation(
 export async function getProgramsForSkills(
   skillUris: string[],
   locale: Locale,
-  limit = 5
+  limit = 5,
+  minCoveredSkills = MIN_COVERED_SKILLS
 ): Promise<ProgramMatch[]> {
   if (!isSupabaseConfigured() || skillUris.length === 0) return [];
   try {
@@ -143,6 +164,7 @@ export async function getProgramsForSkills(
       coveredSkills: m.seen.size,
     }));
     return dedupeVersions(matches)
+      .filter((m) => (m.coveredSkills ?? 0) >= minCoveredSkills)
       .sort(
         (a, b) =>
           (b.coveredSkills ?? 0) - (a.coveredSkills ?? 0) || b.similarity - a.similarity
