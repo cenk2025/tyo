@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, Target as TargetIcon, Leaf, GraduationCap } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getOccupationByCode, getOccupationSkills } from "@/lib/esco/queries";
-import { getProgramsForOccupation } from "@/lib/education/queries";
+import {
+  getProgramsForOccupation,
+  getProgramsForSkills,
+} from "@/lib/education/queries";
 import { getCurrentUser } from "@/lib/auth";
 import {
   getUserSkillUris,
@@ -68,6 +71,22 @@ export default async function OccupationPage({
   const haveEssential = essential.filter((s) => userSet.has(s.conceptUri));
   const missingEssential = essential.filter((s) => !userSet.has(s.conceptUri));
   const coverage = essential.length ? haveEssential.length / essential.length : 0;
+  /**
+   * Degree-title matching can only ever reach the few hundred ESCO occupations
+   * whose Finnish label resembles a Finnish degree title, so most occupations
+   * have no direct qualification. Rather than a dead end, fall back to
+   * qualifications that teach this occupation's essential skills — a weaker
+   * claim, and labelled as one: "leads to this job" and "teaches some of these
+   * skills" are different statements and the headings say which is which.
+   */
+  const relatedPrograms =
+    programs.length === 0
+      ? await getProgramsForSkills(
+          essential.map((sk) => sk.conceptUri).slice(0, 25),
+          locale as Locale
+        )
+      : [];
+
   const grp = majorGroupOf(occupation.iscoGroup);
   const isTarget = targets.includes(occupation.conceptUri);
 
@@ -145,13 +164,23 @@ export default async function OccupationPage({
         <section className="mb-8">
           <h2 className="mb-1 flex items-center gap-2 font-semibold">
             <GraduationCap className="h-4 w-4 text-muted-foreground" />
-            {t("educationTitle")}
+            {programs.length === 0 && relatedPrograms.length > 0
+              ? t("educationRelatedTitle")
+              : t("educationTitle")}
           </h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            {t("educationSubtitle")}
+            {programs.length === 0 && relatedPrograms.length > 0
+              ? t("educationRelatedSubtitle")
+              : t("educationSubtitle")}
           </p>
           {programs.length > 0 ? (
             <ProgramList programs={programs} locale={locale} />
+          ) : relatedPrograms.length > 0 ? (
+            <ProgramList
+              programs={relatedPrograms}
+              locale={locale}
+              coverageKey="coversOccupationSkills"
+            />
           ) : (
             <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
               {t("educationEmpty")}

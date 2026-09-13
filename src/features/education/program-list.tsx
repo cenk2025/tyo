@@ -44,9 +44,17 @@ function opintopolkuUrl(label: string, locale: string): string {
 export async function ProgramList({
   programs,
   locale,
+  coverageKey = "coversSkills",
 }: {
   programs: ProgramMatch[];
   locale: string;
+  /**
+   * Which sentence explains the coverage count. The skills being counted differ
+   * by caller — the user's own learning list in one place, an occupation's
+   * essential skills in another — and saying "from your list" about skills the
+   * user never picked would be wrong.
+   */
+  coverageKey?: "coversSkills" | "coversOccupationSkills";
 }) {
   const t = await getTranslations("education");
 
@@ -67,7 +75,7 @@ export async function ProgramList({
               </div>
               {p.coveredSkills != null && p.coveredSkills > 0 && (
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {t("coversSkills", { count: p.coveredSkills })}
+                  {t(coverageKey, { count: p.coveredSkills })}
                 </p>
               )}
             </div>

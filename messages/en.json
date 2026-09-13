@@ -211,7 +211,9 @@
     "relatedOccupations": "Where this skill can take you",
     "educationTitle": "Qualifications that lead to this occupation",
     "educationSubtitle": "Finnish vocational qualifications (ePerusteet, Finnish National Agency for Education)",
-    "educationEmpty": "No direct Finnish vocational qualification was found for this occupation."
+    "educationEmpty": "No direct Finnish vocational qualification was found for this occupation.",
+    "educationRelatedTitle": "Qualifications that teach this occupation's skills",
+    "educationRelatedSubtitle": "No direct qualification was found, but these cover some of the occupation's essential skills"
   },
   "explore": {
     "occupationsTitle": "Browse occupations",
@@ -253,7 +255,8 @@
     "ammattitutkinto": "Further vocational qualification",
     "erikoisammattitutkinto": "Specialist vocational qualification",
     "coversSkills": "Covers {count} skills from your list",
-    "searchOpintopolku": "Search on Opintopolku"
+    "searchOpintopolku": "Search on Opintopolku",
+    "coversOccupationSkills": "Covers {count} of this occupation's essential skills"
   },
   "account": {
     "title": "Account",

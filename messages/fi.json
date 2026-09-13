@@ -211,7 +211,9 @@
     "relatedOccupations": "Mihin tämä taito voi viedä",
     "educationTitle": "Tutkinnot, jotka vievät tähän ammattiin",
     "educationSubtitle": "Suomen ammatilliset tutkinnot (Opetushallituksen ePerusteet)",
-    "educationEmpty": "Tälle ammatille ei löytynyt suoraa suomalaista ammatillista tutkintoa."
+    "educationEmpty": "Tälle ammatille ei löytynyt suoraa suomalaista ammatillista tutkintoa.",
+    "educationRelatedTitle": "Tutkinnot, joissa opetetaan tämän ammatin taitoja",
+    "educationRelatedSubtitle": "Suoraa tutkintoa ei löytynyt, mutta nämä kattavat osan ammatin ydintaidoista"
   },
   "explore": {
     "occupationsTitle": "Selaa ammatteja",
@@ -253,7 +255,8 @@
     "ammattitutkinto": "Ammattitutkinto",
     "erikoisammattitutkinto": "Erikoisammattitutkinto",
     "coversSkills": "Kattaa {count} taitoa listaltasi",
-    "searchOpintopolku": "Etsi Opintopolusta"
+    "searchOpintopolku": "Etsi Opintopolusta",
+    "coversOccupationSkills": "Kattaa {count} tämän ammatin ydintaitoa"
   },
   "account": {
     "title": "Tili",
