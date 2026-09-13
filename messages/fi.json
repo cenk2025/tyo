@@ -248,7 +248,10 @@
     "markDone": "Merkitse valmiiksi",
     "markPlanned": "Palauta suunnitteille",
     "completedAddsSkill": "Valmistuessaan taito lisätään profiiliisi.",
-    "empty": "Oppimislistasi on tyhjä."
+    "empty": "Oppimislistasi on tyhjä.",
+    "educationTitle": "Tutkinnot, jotka kattavat nämä taidot",
+    "educationSubtitle": "Suomen ammatilliset tutkinnot, joissa opetetaan listasi taitoja",
+    "educationEmpty": "Yksikään ammatillinen tutkinto ei kata riittävää osaa listasi taidoista. Lisää taitoja listaan, niin osumia voi löytyä."
   },
   "education": {
     "perustutkinto": "Perustutkinto",

@@ -248,7 +248,10 @@
     "markDone": "Mark done",
     "markPlanned": "Move to planned",
     "completedAddsSkill": "When completed, the skill is added to your profile.",
-    "empty": "Your learning list is empty."
+    "empty": "Your learning list is empty.",
+    "educationTitle": "Qualifications that cover these skills",
+    "educationSubtitle": "Finnish vocational qualifications that teach skills from your list",
+    "educationEmpty": "No vocational qualification covers enough of your list yet. Add more skills and matches may appear."
   },
   "education": {
     "perustutkinto": "Upper secondary vocational qualification",
