@@ -43,7 +43,8 @@
     "logout": "Log out",
     "openMenu": "Open menu",
     "toggleTheme": "Toggle theme",
-    "language": "Language"
+    "language": "Language",
+    "langfit": "LangFit"
   },
   "landing": {
     "heroTitle": "Discover which occupations fit your skills",
@@ -310,5 +311,155 @@
     "generic": "Something went wrong. Please try again.",
     "notConfigured": "The database isn't connected yet. Add your Supabase settings to .env.",
     "notFound": "Page not found."
+  },
+  "langfit": {
+    "eyebrow": "For employers · demo",
+    "title": "LangFit – language requirements, task by task",
+    "subtitle": "Paste a job ad. LangFit splits the job into tasks and records, for each, which language is needed, at what level and when – from day one or within 6–12 months. You get a posting text, a rationale note and a language plan.",
+    "intro": {
+      "step1Title": "1. Tasks",
+      "step1Body": "The job is split into 5–10 concrete work situations.",
+      "step2Title": "2. Levels and grounds",
+      "step2Body": "Per task: a CEFR level for four skills, a timeline and a job-based reason.",
+      "step3Title": "3. Approved outputs",
+      "step3Body": "Outputs are generated only from rows the employer approved."
+    },
+    "notice": {
+      "title": "AI suggestions are labelled – LangFit describes the job, it doesn't assess people",
+      "body": "Rows produced by AI are marked “unvalidated” and are not saved until the employer approves them. AI can't remove the statutory requirement of a regulated profession. This is a demo: nothing here is legal advice, and the legal references must be checked."
+    },
+    "saved": {
+      "title": "Saved analyses",
+      "tasks": "{count, plural, one {# task} other {# tasks}}"
+    },
+    "tabEmployer": "For employers",
+    "tabSeeker": "For job seekers",
+    "untitled": "Untitled ad",
+    "newAnalysis": "New analysis",
+    "addTask": "Add a task manually",
+    "step1": {
+      "title": "The ad",
+      "hint": "Paste your own ad or try an example.",
+      "samples": "Examples:",
+      "titleLabel": "Job title",
+      "adLabel": "Ad text",
+      "adPlaceholder": "Paste the job ad here…",
+      "regulatedLabel": "Regulated profession",
+      "regulatedNone": "Not regulated",
+      "regulatedDetected": "Based on the ad, this may be a regulated profession: {label}.",
+      "apply": "Apply"
+    },
+    "ai": {
+      "suggest": "Suggest tasks with AI",
+      "working": "AI is analysing… (may take a minute)",
+      "unavailable": "AI isn't available in this environment. Add tasks manually or try an example.",
+      "failed": "The AI didn't respond. You can add tasks manually.",
+      "tooShort": "The ad is too short to analyse."
+    },
+    "step2": {
+      "title": "Tasks and language requirements",
+      "hint": "Review each row and approve it. Only approved rows reach the outputs and get saved.",
+      "count": "{done}/{total} approved"
+    },
+    "step3": {
+      "title": "Outputs",
+      "empty": "Approve at least one task to see the outputs.",
+      "note": "Rationale note",
+      "posting": "Posting text",
+      "plan": "Language plan"
+    },
+    "save": {
+      "button": "Save analysis",
+      "saved": "Saved.",
+      "error": "Saving failed.",
+      "noValidated": "Approve at least one task first.",
+      "loginToSave": "Sign in to save the analysis."
+    },
+    "origin": {
+      "ai": "AI suggestion",
+      "example": "Example",
+      "human": "Added manually",
+      "rule": "Statutory"
+    },
+    "validated": "Approved",
+    "unvalidated": "Unvalidated",
+    "locked": "Locked",
+    "lockedHint": "Statutory requirement ({statute}): language, timing and grounds are locked and English can't be marked sufficient. You set the levels.",
+    "approve": "Approve",
+    "edit": "Edit",
+    "remove": "Remove",
+    "copy": "Copy",
+    "copied": "Copied",
+    "levelNone": "Not needed",
+    "field": {
+      "description": "Task",
+      "language": "Language",
+      "requiredBy": "Needed by",
+      "rationaleType": "Grounds",
+      "levels": "Skill levels",
+      "rationale": "Justification",
+      "rationalePlaceholder": "Why is this level needed in this particular task?",
+      "englishSufficient": "English is sufficient for this task"
+    },
+    "lang": {
+      "fi": "Finnish",
+      "sv": "Swedish",
+      "en": "English"
+    },
+    "skill": {
+      "listening": "Listening",
+      "reading": "Reading",
+      "speaking": "Speaking",
+      "writing": "Writing"
+    },
+    "by": {
+      "day1": "from day one",
+      "m6": "within 6 months",
+      "m12": "within 12 months"
+    },
+    "rationale": {
+      "customer_work": "Customer work",
+      "patient_safety": "Patient safety",
+      "official_responsibility": "Official responsibility",
+      "legislation": "Legislation",
+      "none": "No job-based reason"
+    },
+    "warning": {
+      "noRationale": "There's no job-based reason for requiring a national language here. Without one the requirement may be discriminatory – consider accepting English.",
+      "highWithoutRationale": "A C1–C2 level without grounds is rarely essential for the task.",
+      "rationaleTextMissing": "Write a short justification – it goes into the rationale note.",
+      "noLevels": "Pick a level for at least one skill."
+    },
+    "seeker": {
+      "title": "Can I start? – {job}",
+      "intro": "This is how a job seeker sees the same posting. Rate your own language skills in four areas.",
+      "privacy": "Your assessment stays in this browser only. It isn't saved or shown to the employer.",
+      "language": "Language to assess",
+      "notYet": "Not yet",
+      "can": {
+        "A1": "familiar words and phrases",
+        "A2": "I manage everyday situations",
+        "B1": "I manage most work situations",
+        "B2": "I communicate fluently, also in demanding situations",
+        "C1": "I use the language flexibly and precisely",
+        "C2": "I master the language in almost any situation"
+      },
+      "noPosting": "Approve some tasks on the employer tab first. This view shows the same posting through a job seeker's eyes.",
+      "noTasksInLanguage": "The posting has no requirements for this language.",
+      "canStart": "You can start this job at your current level",
+      "cannotStart": "Some tasks need a higher level from day one",
+      "status": {
+        "ok": "your level is enough",
+        "learn": "you can start – target {by}",
+        "gap": "needed {by}",
+        "english": "English is sufficient"
+      },
+      "gapsTitle": "To practise",
+      "addToLearning": "Add to learning list",
+      "inLearning": "On learning list",
+      "notFound": "ESCO skill not found",
+      "loginForLearning": "Sign in to add these to your learning list.",
+      "externalNote": "For ads from other services (e.g. Työmarkkinatori) only the requirement stated in the ad itself is shown – nobody else's ad is labelled by guesswork."
+    }
   }
 }
