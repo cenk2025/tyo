@@ -43,7 +43,8 @@
     "logout": "Kirjaudu ulos",
     "openMenu": "Avaa valikko",
     "toggleTheme": "Vaihda teemaa",
-    "language": "Kieli"
+    "language": "Kieli",
+    "langfit": "LangFit"
   },
   "landing": {
     "heroTitle": "Selvitä mihin ammattiin taitosi sopivat",
@@ -310,5 +311,155 @@
     "generic": "Jotain meni pieleen. Yritä uudelleen.",
     "notConfigured": "Tietokantaa ei ole vielä yhdistetty. Lisää Supabase-asetukset .env-tiedostoon.",
     "notFound": "Sivua ei löytynyt."
+  },
+  "langfit": {
+    "eyebrow": "Työnantajille · demo",
+    "title": "LangFit – kielitaitovaatimus tehtävä kerrallaan",
+    "subtitle": "Liitä työpaikkailmoitus. LangFit jakaa työn tehtäviin ja kirjaa jokaiselle, mitä kieltä tarvitaan, millä tasolla ja milloin – aloituksesta vai 6–12 kuukauden kuluessa. Tuloksena ilmoitusteksti, perustelumuistio ja kielisuunnitelma.",
+    "intro": {
+      "step1Title": "1. Tehtävät",
+      "step1Body": "Työ pilkotaan 5–10 konkreettiseen työtilanteeseen.",
+      "step2Title": "2. Tasot ja perusteet",
+      "step2Body": "Jokaiselle tehtävälle neljän osa-alueen CEFR-taso, aikataulu ja työhön perustuva syy.",
+      "step3Title": "3. Hyväksytyt tulokset",
+      "step3Body": "Tulokset syntyvät vain työnantajan hyväksymistä riveistä."
+    },
+    "notice": {
+      "title": "Tekoälyn ehdotukset on merkitty – LangFit kuvaa työtä, ei arvioi ihmisiä",
+      "body": "Tekoälyn tuottamat rivit näkyvät merkinnällä ”validoimaton”, eikä niitä tallenneta ennen työnantajan hyväksyntää. Säänneltyjen ammattien lakisääteistä vaatimusta tekoäly ei voi poistaa. Tämä on demo: sisältö ei ole oikeudellinen neuvo, ja lakiviittaukset on tarkistettava."
+    },
+    "saved": {
+      "title": "Tallennetut analyysit",
+      "tasks": "{count, plural, one {# tehtävä} other {# tehtävää}}"
+    },
+    "tabEmployer": "Työnantajalle",
+    "tabSeeker": "Työnhakijalle",
+    "untitled": "Nimetön ilmoitus",
+    "newAnalysis": "Uusi analyysi",
+    "addTask": "Lisää tehtävä käsin",
+    "step1": {
+      "title": "Ilmoitus",
+      "hint": "Liitä oma ilmoitus tai kokeile esimerkillä.",
+      "samples": "Esimerkit:",
+      "titleLabel": "Tehtävänimike",
+      "adLabel": "Ilmoitusteksti",
+      "adPlaceholder": "Liitä työpaikkailmoitus tähän…",
+      "regulatedLabel": "Säännelty ammatti",
+      "regulatedNone": "Ei säännelty",
+      "regulatedDetected": "Ilmoituksen perusteella tämä voi olla säännelty ammatti: {label}.",
+      "apply": "Ota käyttöön"
+    },
+    "ai": {
+      "suggest": "Ehdota tehtävät tekoälyllä",
+      "working": "Tekoäly analysoi… (voi kestää minuutin)",
+      "unavailable": "Tekoäly ei ole käytettävissä tässä ympäristössä. Lisää tehtävät käsin tai kokeile esimerkkiä.",
+      "failed": "Tekoäly ei vastannut. Voit lisätä tehtävät käsin.",
+      "tooShort": "Ilmoitus on liian lyhyt analysoitavaksi."
+    },
+    "step2": {
+      "title": "Tehtävät ja kielitaitovaatimukset",
+      "hint": "Tarkista jokainen rivi ja hyväksy se. Vain hyväksytyt rivit päätyvät tuloksiin ja tallennetaan.",
+      "count": "{done}/{total} hyväksytty"
+    },
+    "step3": {
+      "title": "Tulokset",
+      "empty": "Hyväksy vähintään yksi tehtävä nähdäksesi tulokset.",
+      "note": "Perustelumuistio",
+      "posting": "Ilmoitusteksti",
+      "plan": "Kielisuunnitelma"
+    },
+    "save": {
+      "button": "Tallenna analyysi",
+      "saved": "Tallennettu.",
+      "error": "Tallennus epäonnistui.",
+      "noValidated": "Hyväksy ensin vähintään yksi tehtävä.",
+      "loginToSave": "Kirjaudu sisään tallentaaksesi analyysin."
+    },
+    "origin": {
+      "ai": "Tekoälyn ehdotus",
+      "example": "Esimerkki",
+      "human": "Käsin lisätty",
+      "rule": "Lakisääteinen"
+    },
+    "validated": "Hyväksytty",
+    "unvalidated": "Validoimaton",
+    "locked": "Lukittu",
+    "lockedHint": "Lakisääteinen vaatimus ({statute}): kieli, aikataulu ja peruste ovat lukittuja, eikä englantia voi merkitä riittäväksi. Tasot arvioit itse.",
+    "approve": "Hyväksy",
+    "edit": "Muokkaa",
+    "remove": "Poista",
+    "copy": "Kopioi",
+    "copied": "Kopioitu",
+    "levelNone": "Ei tarvita",
+    "field": {
+      "description": "Tehtävä",
+      "language": "Kieli",
+      "requiredBy": "Milloin tarvitaan",
+      "rationaleType": "Peruste",
+      "levels": "Taitotasot",
+      "rationale": "Perustelu",
+      "rationalePlaceholder": "Miksi tätä tasoa tarvitaan juuri tässä tehtävässä?",
+      "englishSufficient": "Englanti riittää tähän tehtävään"
+    },
+    "lang": {
+      "fi": "Suomi",
+      "sv": "Ruotsi",
+      "en": "Englanti"
+    },
+    "skill": {
+      "listening": "Kuullun ymmärtäminen",
+      "reading": "Luetun ymmärtäminen",
+      "speaking": "Puhuminen",
+      "writing": "Kirjoittaminen"
+    },
+    "by": {
+      "day1": "aloituksesta",
+      "m6": "6 kk kuluessa",
+      "m12": "12 kk kuluessa"
+    },
+    "rationale": {
+      "customer_work": "Asiakastyö",
+      "patient_safety": "Potilasturvallisuus",
+      "official_responsibility": "Viranomaisvastuu",
+      "legislation": "Lainsäädäntö",
+      "none": "Ei työhön perustuvaa syytä"
+    },
+    "warning": {
+      "noRationale": "Kansalliskielen vaatimukselle ei ole työhön perustuvaa syytä. Ilman sitä vaatimus voi olla syrjivä – harkitse englannin hyväksymistä.",
+      "highWithoutRationale": "C1–C2-taso ilman perustetta on harvoin tehtävän kannalta välttämätön.",
+      "rationaleTextMissing": "Kirjoita lyhyt perustelu – se päätyy perustelumuistioon.",
+      "noLevels": "Valitse taso vähintään yhdelle osa-alueelle."
+    },
+    "seeker": {
+      "title": "Voinko aloittaa? – {job}",
+      "intro": "Näin työnhakija näkee saman ilmoituksen. Arvioi oma kielitaitosi neljällä osa-alueella.",
+      "privacy": "Arviosi pysyy vain tässä selaimessa. Sitä ei tallenneta eikä näytetä työnantajalle.",
+      "language": "Arvioitava kieli",
+      "notYet": "En osaa vielä",
+      "can": {
+        "A1": "tutut sanat ja ilmaukset",
+        "A2": "selviän tavallisista arkitilanteista",
+        "B1": "selviän useimmista työn tilanteista",
+        "B2": "viestin sujuvasti myös vaativissa tilanteissa",
+        "C1": "käytän kieltä joustavasti ja tarkasti",
+        "C2": "hallitsen kielen lähes kaikissa tilanteissa"
+      },
+      "noPosting": "Hyväksy ensin tehtäviä Työnantajalle-välilehdellä. Tämä näkymä näyttää saman ilmoituksen työnhakijan silmin.",
+      "noTasksInLanguage": "Ilmoituksessa ei ole tätä kieltä koskevia vaatimuksia.",
+      "canStart": "Voit aloittaa tässä työssä nykyisellä tasollasi",
+      "cannotStart": "Osa tehtävistä vaatii korkeampaa tasoa jo aloituksesta",
+      "status": {
+        "ok": "tasosi riittää",
+        "learn": "voit aloittaa – tavoite {by}",
+        "gap": "tarvitaan {by}",
+        "english": "englanti riittää"
+      },
+      "gapsTitle": "Harjoiteltavaa",
+      "addToLearning": "Lisää oppimislistaan",
+      "inLearning": "Oppimislistalla",
+      "notFound": "ESCO-taitoa ei löytynyt",
+      "loginForLearning": "Kirjaudu sisään lisätäksesi harjoiteltavat oppimislistaasi.",
+      "externalNote": "Muiden palveluiden (esim. Työmarkkinatori) ilmoituksissa näytetään vain ilmoituksessa itsessään mainittu vaatimus – toisen ilmoitusta ei merkitä arvailun perusteella."
+    }
   }
 }

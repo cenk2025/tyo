@@ -23,6 +23,9 @@ export async function SiteHeader() {
           <Button asChild variant="ghost" size="sm">
             <Link href="/occupations">{t("explore")}</Link>
           </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/langfit">{t("langfit")}</Link>
+          </Button>
         </nav>
         <div className="ml-auto flex items-center gap-1">
           <LocaleSwitcher />
