@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Compass,
   Languages,
+  Route,
   User,
   Menu,
   X,
@@ -29,6 +30,7 @@ const NAV = [
   { href: "/dashboard/learning", key: "learning", icon: GraduationCap },
   { href: "/occupations", key: "explore", icon: Compass },
   { href: "/langfit", key: "langfit", icon: Languages },
+  { href: "/perehdytys", key: "onboardPath", icon: Route },
   { href: "/dashboard/account", key: "account", icon: User },
 ] as const;
 
