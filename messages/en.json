@@ -44,7 +44,8 @@
     "openMenu": "Open menu",
     "toggleTheme": "Toggle theme",
     "language": "Language",
-    "langfit": "LangFit"
+    "langfit": "LangFit",
+    "onboardPath": "Onboarding Path"
   },
   "landing": {
     "heroTitle": "Discover which occupations fit your skills",
@@ -461,5 +462,78 @@
       "loginForLearning": "Sign in to add these to your learning list.",
       "externalNote": "For ads from other services (e.g. Työmarkkinatori) only the requirement stated in the ad itself is shown – nobody else's ad is labelled by guesswork."
     }
+  },
+  "onboardPath": {
+    "eyebrow": "For employers · demo",
+    "title": "Onboarding Path – from new hire to skilled professional",
+    "subtitle": "Choose the role you are hiring for and the new hire's previous occupation. Onboarding Path shows which skills are already in place, what is learned at the workplace and which qualification units cover the rest.",
+    "intro": {
+      "step1Title": "1. Role and background",
+      "step1Body": "Two ESCO occupations: the new role and the previous one.",
+      "step2Title": "2. Learning on the job",
+      "step2Body": "Missing essential skills learned together with a work buddy.",
+      "step3Title": "3. Qualification units",
+      "step3Body": "As few Finnish qualification units as possible to cover the remaining gaps."
+    },
+    "notice": {
+      "title": "Compares occupations – doesn't assess people",
+      "body": "The path is computed directly from the ESCO classification and the Finnish National Agency for Education's ePerusteet; no language model is used. It describes the difference between two occupations, not anyone's personal skills: confirm actual skills in a conversation with the new hire. Demo – check the terms of training and funding."
+    },
+    "picker": {
+      "title": "Create an onboarding path",
+      "hint": "The previous occupation is optional. Without it, the path covers all essential skills of the role.",
+      "toLabel": "Role you are hiring for",
+      "toHint": "E.g. warehouse worker, cook, healthcare assistant.",
+      "fromLabel": "New hire's previous occupation (optional)",
+      "fromHint": "An occupation they have worked in before.",
+      "search": "Search occupations…",
+      "clear": "Clear selection",
+      "build": "Create path",
+      "samples": "Examples:"
+    },
+    "noPlan": "No essential skills were found for this role. Try another occupation.",
+    "summary": "The background covers {have}/{total} of the role's essential skills.",
+    "stats": {
+      "have": "essential skills from the background",
+      "onTheJob": "learned at the workplace",
+      "units": "qualification units cover {count} gaps"
+    },
+    "phase1": {
+      "title": "Build on existing skills",
+      "when": "from day one",
+      "hint": "These essential skills come from the previous occupation. Induction can cover them quickly.",
+      "empty": "The previous occupation covers none of the role's essential skills – or none was chosen."
+    },
+    "phase2": {
+      "title": "Workplace induction",
+      "when": "0–3 months",
+      "hint": "Missing essential skills with no matching qualification unit. Learned on the job with a buddy or a responsible person.",
+      "empty": "All gaps are covered by qualification units."
+    },
+    "phase3": {
+      "title": "Qualification units",
+      "when": "3–12 months",
+      "hint": "As few Finnish qualification units (tutkinnon osat) as possible to cover the remaining essential skills. They can be completed while working, e.g. as an apprenticeship.",
+      "empty": "No matching qualification units were found for the gaps.",
+      "covers": "Covers {count, plural, one {# gap} other {# gaps}}",
+      "finnishOnly": "Unit titles are shown in Finnish, as published in ePerusteet."
+    },
+    "phase4": {
+      "title": "Later",
+      "when": "optional",
+      "hint": "Optional skills of the role not found in the background. A good next step once the basics are in place."
+    },
+    "funding": {
+      "title": "Delivery and funding",
+      "apprenticeshipTitle": "Apprenticeship (oppisopimus):",
+      "apprenticeship": "units can be completed while working, and the employer may receive a training compensation.",
+      "jointTitle": "Joint-purchase training:",
+      "joint": "RekryKoulutus for new hires and TäsmäKoulutus for existing staff – costs are shared with a public funder.",
+      "check": "Terms and responsible bodies vary by region. Ask a local vocational institution or employment services."
+    },
+    "langfitLink": "Does the role need Finnish? Set the language requirement with LangFit",
+    "copy": "Copy plan",
+    "copied": "Copied",
+    "print": "Print"
   }
 }

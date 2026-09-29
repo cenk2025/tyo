@@ -331,3 +331,54 @@ export async function getProgramOccupations(
     return [];
   }
 }
+
+/** A tutkinnon osa (unit) that teaches one skill, from the units_for_skills RPC (0020). */
+export interface SkillUnitMatch {
+  skillUri: string;
+  program: EducationProgram;
+  osaId: number;
+  /** Unit title as published in ePerusteet — Finnish only. */
+  unitTitle: string;
+  similarity: number;
+}
+
+/**
+ * For each skill, the units inside its already-linked qualifications that
+ * teach it best. Duplicate qualification revisions are collapsed to the
+ * strongest match, as elsewhere in this file.
+ */
+export async function getUnitsForSkills(
+  skillUris: string[],
+  locale: Locale
+): Promise<SkillUnitMatch[]> {
+  if (!isSupabaseConfigured() || skillUris.length === 0) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("units_for_skills", {
+      p_skill_uris: skillUris.slice(0, 40),
+    });
+    if (error) throw error;
+    const rows = (data ?? []) as Row[];
+    // Keep one revision per qualification name: the one with the best match overall.
+    const bestRevision = new Map<string, { id: number; sim: number }>();
+    for (const r of rows) {
+      const key = `${r.koulutustyyppi}::${String(r.name_fi ?? "").toLowerCase()}`;
+      const sim = Number(r.similarity ?? 0);
+      const prev = bestRevision.get(key);
+      if (!prev || sim > prev.sim) bestRevision.set(key, { id: Number(r.program_id), sim });
+    }
+    const keep = new Set(Array.from(bestRevision.values()).map((v) => v.id));
+    return rows
+      .filter((r) => keep.has(Number(r.program_id)))
+      .map((r) => ({
+        skillUri: String(r.skill_uri),
+        program: toProgram({ ...r, id: r.program_id }, locale),
+        osaId: Number(r.osa_id),
+        unitTitle: String(r.unit_title ?? "").trim(),
+        similarity: Number(r.similarity ?? 0),
+      }))
+      .filter((m) => m.unitTitle !== "");
+  } catch {
+    return [];
+  }
+}

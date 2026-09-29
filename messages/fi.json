@@ -44,7 +44,8 @@
     "openMenu": "Avaa valikko",
     "toggleTheme": "Vaihda teemaa",
     "language": "Kieli",
-    "langfit": "LangFit"
+    "langfit": "LangFit",
+    "onboardPath": "Perehdytyspolku"
   },
   "landing": {
     "heroTitle": "Selvitä mihin ammattiin taitosi sopivat",
@@ -461,5 +462,78 @@
       "loginForLearning": "Kirjaudu sisään lisätäksesi harjoiteltavat oppimislistaasi.",
       "externalNote": "Muiden palveluiden (esim. Työmarkkinatori) ilmoituksissa näytetään vain ilmoituksessa itsessään mainittu vaatimus – toisen ilmoitusta ei merkitä arvailun perusteella."
     }
+  },
+  "onboardPath": {
+    "eyebrow": "Työnantajille · demo",
+    "title": "Perehdytyspolku – uudesta työntekijästä osaajaksi",
+    "subtitle": "Valitse rooli, johon palkkaat, ja uuden työntekijän aiempi ammatti. Perehdytyspolku näyttää, mitä osaamista on jo valmiina, mitä opitaan työpaikalla ja mitkä tutkinnon osat kattavat loput.",
+    "intro": {
+      "step1Title": "1. Rooli ja tausta",
+      "step1Body": "Kaksi ESCO-ammattia: uusi rooli ja aiempi ammatti.",
+      "step2Title": "2. Perehdytys työssä",
+      "step2Body": "Puuttuvat ydintaidot, jotka opitaan työparin kanssa.",
+      "step3Title": "3. Tutkinnon osat",
+      "step3Body": "Mahdollisimman vähän tutkinnon osia, jotka kattavat loput puutteet."
+    },
+    "notice": {
+      "title": "Vertaa ammatteja – ei arvioi ihmisiä",
+      "body": "Polku lasketaan suoraan ESCO-luokituksesta ja Opetushallituksen ePerusteista, eikä kielimallia käytetä. Se kuvaa kahden ammatin eroa, ei kenenkään henkilökohtaista osaamista: varmista todellinen osaaminen keskustelussa uuden työntekijän kanssa. Demo – tarkista koulutusten ja rahoituksen ehdot."
+    },
+    "picker": {
+      "title": "Luo perehdytyspolku",
+      "hint": "Aiempi ammatti on valinnainen. Ilman sitä polku kattaa kaikki roolin ydintaidot.",
+      "toLabel": "Rooli, johon palkkaat",
+      "toHint": "Esim. varastotyöntekijä, kokki, lähihoitaja.",
+      "fromLabel": "Uuden työntekijän aiempi ammatti (valinnainen)",
+      "fromHint": "Ammatti, jossa hän on työskennellyt aiemmin.",
+      "search": "Hae ammattia…",
+      "clear": "Poista valinta",
+      "build": "Luo polku",
+      "samples": "Esimerkit:"
+    },
+    "noPlan": "Tälle roolille ei löytynyt ydintaitoja. Kokeile toista ammattia.",
+    "summary": "Taustasta löytyy {have}/{total} roolin ydintaidosta.",
+    "stats": {
+      "have": "ydintaitoa jo taustasta",
+      "onTheJob": "opitaan työpaikalla",
+      "units": "tutkinnon osaa kattaa {count} puutetta"
+    },
+    "phase1": {
+      "title": "Hyödynnä olemassa oleva osaaminen",
+      "when": "heti",
+      "hint": "Nämä ydintaidot tulevat aiemmasta ammatista. Perehdytyksessä ne voi käydä nopeasti läpi.",
+      "empty": "Aiempi ammatti ei kata roolin ydintaitoja – tai sitä ei valittu."
+    },
+    "phase2": {
+      "title": "Perehdytys työpaikalla",
+      "when": "0–3 kk",
+      "hint": "Puuttuvat ydintaidot, joille ei löytynyt tutkinnon osaa. Opitaan työssä työparin tai vastuuhenkilön kanssa.",
+      "empty": "Kaikki puutteet katetaan tutkinnon osilla."
+    },
+    "phase3": {
+      "title": "Tutkinnon osat",
+      "when": "3–12 kk",
+      "hint": "Mahdollisimman vähän tutkinnon osia, jotka kattavat loput ydintaidoista. Ne voi suorittaa työn ohessa, esimerkiksi oppisopimuksella.",
+      "empty": "Puutteille ei löytynyt sopivia tutkinnon osia.",
+      "covers": "Kattaa {count, plural, one {# puutteen} other {# puutetta}}",
+      "finnishOnly": ""
+    },
+    "phase4": {
+      "title": "Myöhemmin",
+      "when": "valinnaiset",
+      "hint": "Roolin valinnaisia taitoja, joita taustasta ei löydy. Hyvä jatko, kun perusasiat ovat hallussa."
+    },
+    "funding": {
+      "title": "Toteutus ja rahoitus",
+      "apprenticeshipTitle": "Oppisopimus:",
+      "apprenticeship": "tutkinnon osat voi suorittaa työn ohessa, ja työnantajalle voidaan maksaa koulutuskorvausta.",
+      "jointTitle": "Yhteishankintakoulutus:",
+      "joint": "RekryKoulutus uusille työntekijöille ja TäsmäKoulutus nykyiselle henkilöstölle – kustannukset jaetaan julkisen rahoittajan kanssa.",
+      "check": "Ehdot ja vastuutahot vaihtelevat alueittain. Kysy alueen ammatilliselta oppilaitokselta tai työllisyyspalveluista."
+    },
+    "langfitLink": "Tarvitaanko rooliin suomen kieltä? Määritä kielitaitovaatimus LangFitillä",
+    "copy": "Kopioi suunnitelma",
+    "copied": "Kopioitu",
+    "print": "Tulosta"
   }
 }
