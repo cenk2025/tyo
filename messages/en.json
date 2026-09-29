@@ -45,7 +45,8 @@
     "toggleTheme": "Toggle theme",
     "language": "Language",
     "langfit": "LangFit",
-    "onboardPath": "Onboarding Path"
+    "onboardPath": "Onboarding Path",
+    "hiddenTalent": "Hidden Talent"
   },
   "landing": {
     "heroTitle": "Discover which occupations fit your skills",
@@ -535,5 +536,47 @@
     "copy": "Copy plan",
     "copied": "Copied",
     "print": "Print"
+  },
+  "hiddenTalent": {
+    "eyebrow": "For employers · demo",
+    "title": "Hidden Talent – who else could do this job?",
+    "subtitle": "Choose the role you are hiring for. Hidden Talent shows which other occupations already carry the role's core skills – and opens your search to people your ad would otherwise miss.",
+    "intro": {
+      "step1Title": "1. Choose the role",
+      "step1Body": "Any of the roughly 3,000 occupations in ESCO.",
+      "step2Title": "2. Find neighbouring occupations",
+      "step2Body": "Occupations sharing the most core skills – including other fields.",
+      "step3Title": "3. Bridge the gaps",
+      "step3Body": "See the missing skills and create an onboarding path for them."
+    },
+    "notice": {
+      "title": "Compares occupations – doesn't assess people",
+      "body": "Results are computed directly from the EU's ESCO classification; no language model is used. The tool shows where the same skills typically sit – it does not assess or score individual applicants."
+    },
+    "picker": {
+      "title": "Who else could do this job?",
+      "hint": "Search for the role you are recruiting for.",
+      "search": "Search occupations…",
+      "samples": "Examples:"
+    },
+    "notFound": "Occupation not found.",
+    "resultsTitle": "Hidden talent: {role}",
+    "resultsSubtitle": "Ranked by fit: how much of the role's {count} core skills the occupation carries, relative to the occupation's own breadth.",
+    "showSameGroup": "Show all occupations (including variants and professional roles)",
+    "hideSameGroup": "Show genuinely different fields only",
+    "empty": "No neighbouring occupations found.",
+    "sharedOf": "{shared}/{total} core skills already in place",
+    "otherField": "Other field",
+    "showDiff": "See the gap",
+    "toPlan": "Onboarding path",
+    "toPlanLong": "Create an onboarding path for this background",
+    "detailTitle": "{from} → {to}",
+    "sharedSkills": "In place ({count})",
+    "missingSkills": "Missing ({count})",
+    "adTitle": "Job ad tip",
+    "adHint": "Add a sentence inviting applicants from the three closest occupations.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "method": "Method: the role's ESCO essential skills are compared with each occupation's ESCO skills (cosine similarity, which scales matches by the occupation's breadth). By default, variants in the same ISCO group or with the same title, and manager/professional roles for entry- and mid-level targets, are left out. Demo – results describe the classification, not the labour market."
   }
 }

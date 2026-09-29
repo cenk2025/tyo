@@ -10,6 +10,7 @@ import {
   Compass,
   Languages,
   Route,
+  UsersRound,
   User,
   Menu,
   X,
@@ -31,6 +32,7 @@ const NAV = [
   { href: "/occupations", key: "explore", icon: Compass },
   { href: "/langfit", key: "langfit", icon: Languages },
   { href: "/perehdytys", key: "onboardPath", icon: Route },
+  { href: "/piilo-osaajat", key: "hiddenTalent", icon: UsersRound },
   { href: "/dashboard/account", key: "account", icon: User },
 ] as const;
 
