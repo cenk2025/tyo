@@ -75,6 +75,6 @@ export function adSnippet(labels: string[], l: "fi" | "en"): string {
       ? labels[0]
       : `${labels.slice(0, -1).join(", ")} ${l === "fi" ? "tai" : "or"} ${labels[labels.length - 1]}`;
   return l === "fi"
-    ? `Toivotamme tervetulleiksi hakijat myös muilta aloilta – esimerkiksi taustalla ${list}. Suuri osa tehtävän ydintaidoista on näissä ammateissa jo hallussa, ja perehdytämme loput.`
-    : `We also welcome applicants from other fields – for example with a background as ${list}. Many of the role's core skills are already part of these occupations, and we will train the rest.`;
+    ? `Toivotamme tervetulleiksi hakijat myös muilta aloilta, esimerkiksi näistä ammateista: ${list}. Suuri osa tehtävän ydintaidoista on niissä jo hallussa, ja perehdytämme loput.`
+    : `We also welcome applicants from other fields, for example these occupations: ${list}. Many of the role's core skills are already part of them, and we will train the rest.`;
 }

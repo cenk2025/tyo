@@ -158,8 +158,11 @@ export default async function HiddenTalentPage({
                             {t("sharedOf", { shared: c.shared, total: c.total })}
                           </p>
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <Badge variant="muted">{majorGroupLabel(major, loc)}</Badge>
-                            {major !== targetMajor && <Badge variant="outline">{t("otherField")}</Badge>}
+                            {major && <Badge variant="muted">{majorGroupLabel(major, loc)}</Badge>}
+                            {/* Only claim "other field" when both ISCO groups are known. */}
+                            {major && targetMajor && major !== targetMajor && (
+                              <Badge variant="outline">{t("otherField")}</Badge>
+                            )}
                           </div>
                           <div className="flex flex-wrap gap-2">
                             <Button asChild size="sm" variant={active ? "secondary" : "outline"}>
