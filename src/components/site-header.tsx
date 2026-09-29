@@ -29,6 +29,9 @@ export async function SiteHeader() {
           <Button asChild variant="ghost" size="sm">
             <Link href="/perehdytys">{t("onboardPath")}</Link>
           </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/piilo-osaajat">{t("hiddenTalent")}</Link>
+          </Button>
         </nav>
         <div className="ml-auto flex items-center gap-1">
           <LocaleSwitcher />

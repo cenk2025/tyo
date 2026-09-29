@@ -45,7 +45,8 @@
     "toggleTheme": "Vaihda teemaa",
     "language": "Kieli",
     "langfit": "LangFit",
-    "onboardPath": "Perehdytyspolku"
+    "onboardPath": "Perehdytyspolku",
+    "hiddenTalent": "Piilo-osaajat"
   },
   "landing": {
     "heroTitle": "Selvitä mihin ammattiin taitosi sopivat",
@@ -535,5 +536,47 @@
     "copy": "Kopioi suunnitelma",
     "copied": "Kopioitu",
     "print": "Tulosta"
+  },
+  "hiddenTalent": {
+    "eyebrow": "Työnantajille · demo",
+    "title": "Piilo-osaajat – keneltä muualta löytyy?",
+    "subtitle": "Valitse rooli, johon etsit tekijää. Piilo-osaajat näyttää, missä muissa ammateissa roolin ydintaidot ovat jo valmiina – ja avaa haun ihmisille, joita ilmoitus ei muuten tavoittaisi.",
+    "intro": {
+      "step1Title": "1. Valitse rooli",
+      "step1Body": "Mikä tahansa ESCO-luokituksen noin 3 000 ammatista.",
+      "step2Title": "2. Löydä naapuriammatit",
+      "step2Body": "Ammatit, joissa on eniten samoja ydintaitoja – myös muilta aloilta.",
+      "step3Title": "3. Paikkaa erot",
+      "step3Body": "Näe puuttuvat taidot ja luo niille perehdytyspolku."
+    },
+    "notice": {
+      "title": "Vertaa ammatteja – ei arvioi ihmisiä",
+      "body": "Tulokset lasketaan suoraan EU:n ESCO-luokituksesta, eikä kielimallia käytetä. Työkalu kertoo, missä ammateissa samat taidot tyypillisesti ovat – se ei arvioi tai pisteytä yksittäisiä hakijoita."
+    },
+    "picker": {
+      "title": "Keneltä muualta löytyy?",
+      "hint": "Hae rooli, johon rekrytoit.",
+      "search": "Hae ammattia…",
+      "samples": "Esimerkit:"
+    },
+    "notFound": "Ammattia ei löytynyt.",
+    "resultsTitle": "Piilo-osaajat: {role}",
+    "resultsSubtitle": "Järjestetty osuvuuden mukaan: kuinka suuri osa roolin {count} ydintaidosta ammatissa on – suhteessa ammatin omaan laajuuteen.",
+    "showSameGroup": "Näytä kaikki ammatit (myös variantit ja asiantuntijatehtävät)",
+    "hideSameGroup": "Näytä vain aidosti eri alat",
+    "empty": "Naapuriammatteja ei löytynyt.",
+    "sharedOf": "{shared}/{total} ydintaidosta valmiina",
+    "otherField": "Eri ala",
+    "showDiff": "Katso erot",
+    "toPlan": "Perehdytyspolku",
+    "toPlanLong": "Luo perehdytyspolku tälle taustalle",
+    "detailTitle": "{from} → {to}",
+    "sharedSkills": "Valmiina ({count})",
+    "missingSkills": "Puuttuu ({count})",
+    "adTitle": "Ilmoitusvinkki",
+    "adHint": "Lisää ilmoitukseen lause, joka kutsuu hakijoita kolmesta lähimmästä ammatista.",
+    "copy": "Kopioi",
+    "copied": "Kopioitu",
+    "method": "Menetelmä: roolin ESCO-ydintaitoja verrataan kunkin ammatin ESCO-taitoihin (kosinisamankaltaisuus, joka suhteuttaa osumat ammatin laajuuteen). Oletuksena pois jätetään saman ISCO-ammattiryhmän ja saman nimikkeen variantit sekä johto- ja erityisasiantuntijatehtävät, kun haettava rooli on perus- tai keskitason tehtävä. Demo – tulokset kuvaavat luokitusta, eivät työmarkkinatilannetta."
   }
 }
