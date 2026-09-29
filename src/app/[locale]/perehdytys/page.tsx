@@ -159,10 +159,10 @@ export default async function OnboardingPathPage({
                     <Card key={u.key}>
                       <CardContent className="space-y-2 pt-4">
                         <p className="font-semibold">{u.title}</p>
-                        <Link href={`/education/${u.program.id}`} className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                        <Link href={`/education/${u.program.id}`} className="text-sm text-primary hover:underline">
                           {u.program.label}
-                          <span className="text-muted-foreground">· {qualificationType(u.program.koulutustyyppi, loc)}</span>
-                          <ArrowRight className="h-3.5 w-3.5" />
+                          <span className="text-muted-foreground"> · {qualificationType(u.program.koulutustyyppi, loc)}</span>
+                          <ArrowRight className="ml-1 inline h-3.5 w-3.5 align-[-2px]" />
                         </Link>
                         <p className="text-xs font-medium text-muted-foreground">{t("phase3.covers", { count: u.skills.length })}</p>
                         <SkillChips skills={u.skills} variant="muted" />

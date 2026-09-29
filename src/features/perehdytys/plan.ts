@@ -39,6 +39,8 @@ export interface OnboardingPlan {
 }
 
 const MAX_UNITS = 6;
+/** Units from a qualification not yet in the plan must cover at least this many gaps. */
+const MIN_GAIN_NEW_PROGRAM = 2;
 
 /**
  * Greedy set cover: repeatedly take the unit that teaches the most still
@@ -63,9 +65,12 @@ export function chooseUnits(gaps: PlanSkill[], matches: SkillUnitMatch[]): { uni
     let best: { key: string; gain: string[]; sim: number; sameProgram: boolean } | null = null;
     for (const [key, c] of candidates) {
       const gain = Array.from(c.skills.keys()).filter((u) => uncovered.has(u));
-      if (gain.length === 0) continue;
-      const sim = gain.reduce((a, u) => a + (c.skills.get(u) ?? 0), 0) / gain.length;
       const sameProgram = chosenPrograms.has(c.match.program.id);
+      // A unit that would pull in a new qualification for a single skill is
+      // noise (e.g. a truck-driving unit for "receive kitchen supplies"); that
+      // skill is better learned on the job.
+      if (gain.length < (sameProgram ? 1 : MIN_GAIN_NEW_PROGRAM)) continue;
+      const sim = gain.reduce((a, u) => a + (c.skills.get(u) ?? 0), 0) / gain.length;
       const better =
         !best ||
         gain.length > best.gain.length ||
