@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<title>VOON IQ — somejulkaisut</title>
+<style>
+  :root {
+    --brand-1: #fb2b3b;
+    --brand-2: #fd4180;
+    --brand: #fd355d;
+    --brand-grad: linear-gradient(90deg, var(--brand-1), var(--brand-2));
+    --brand-grad-diag: linear-gradient(135deg, #fb2b3b 0%, #fd3a6a 55%, #fd4180 100%);
+    --text: #1d1d1f;
+    --text-2: #6e6e73;
+    --text-3: #86868b;
+    --bg-alt: #f5f5f7;
+    --line: #e8e8ed;
+    --display: "Inter Display", "Inter", -apple-system, sans-serif;
+    --body: "Inter", -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #d2d2d7; font-family: var(--body); color: var(--text); -webkit-font-smoothing: antialiased; padding: 40px; display: flex; flex-direction: column; gap: 40px; align-items: flex-start; }
+
+  .post { position: relative; overflow: hidden; background: #fff; color: var(--text); flex: none; }
+  .sq   { width: 1080px; height: 1080px; }
+  .pt   { width: 1080px; height: 1350px; }
+  .st   { width: 1080px; height: 1920px; }
+  .li   { width: 1200px; height: 627px; }
+  .bn   { width: 1584px; height: 396px; }
+
+  .alt  { background: var(--bg-alt); }
+  .dark { background: #000; color: #f5f5f7; --text-2: #a1a1a6; --text-3: #86868b; --line: #333336; }
+  .brandbg { background: var(--brand-grad-diag); color: #fff; --text-2: rgba(255,255,255,.82); }
+
+  /* typography */
+  .eyebrow { font-family: var(--display); font-size: 34px; font-weight: 600; letter-spacing: -0.01em; color: var(--brand); }
+  .dark .eyebrow { color: #ff5a7a; }
+  .brandbg .eyebrow { color: rgba(255,255,255,.85); }
+  .h-xxl { font-family: var(--display); font-size: 220px; font-weight: 700; line-height: .95; letter-spacing: -0.045em; }
+  .h-xl  { font-family: var(--display); font-size: 104px; font-weight: 700; line-height: 1.0; letter-spacing: -0.04em; }
+  .h-l   { font-family: var(--display); font-size: 84px;  font-weight: 700; line-height: 1.02; letter-spacing: -0.035em; }
+  .h-m   { font-family: var(--display); font-size: 64px;  font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; }
+  .sub   { font-family: var(--display); font-size: 38px; font-weight: 500; line-height: 1.25; letter-spacing: -0.015em; color: var(--text-2); }
+  .small { font-size: 26px; line-height: 1.4; color: var(--text-3); letter-spacing: -0.005em; }
+  .grad  { background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .muted { color: var(--text-3); }
+  .center { text-align: center; }
+
+  /* layout helpers */
+  .pad { position: absolute; inset: 0; padding: 96px; display: flex; flex-direction: column; }
+  .top { display: flex; flex-direction: column; gap: 22px; }
+  .foot { position: absolute; left: 96px; right: 96px; bottom: 80px; display: flex; align-items: center; justify-content: space-between; }
+  .url { font-family: var(--display); font-size: 30px; font-weight: 600; letter-spacing: -0.01em; }
+  .logo { height: 46px; width: auto; display: block; }
+  .mark { width: 54px; height: auto; display: block; }
+
+  /* pill CTA */
+  .cta { display: inline-flex; align-items: center; gap: 14px; height: 76px; padding: 0 40px; border-radius: 980px; background: var(--brand-grad); color: #fff; font-family: var(--display); font-size: 30px; font-weight: 600; letter-spacing: -0.01em; }
+  .cta.ghost { background: transparent; color: var(--brand); box-shadow: inset 0 0 0 2px var(--brand); }
+  .cta.white { background: #fff; color: var(--brand); }
+  .chev::after { content: ""; display: inline-block; width: 14px; height: 14px; border-top: 3.5px solid currentColor; border-right: 3.5px solid currentColor; transform: rotate(45deg); margin-left: 2px; }
+
+  /* phone mockup */
+  .phone { position: absolute; width: 470px; height: 960px; border-radius: 76px; background: #1d1d1f; padding: 14px; box-shadow: 0 50px 120px rgba(0,0,0,.18); }
+  .phone .scr { width: 100%; height: 100%; border-radius: 62px; background: #fff; overflow: hidden; position: relative; color: var(--text); --text-2: #6e6e73; --text-3: #86868b; --line: #e8e8ed; }
+  .phone .island { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); width: 130px; height: 36px; border-radius: 20px; background: #000; z-index: 3; }
+  .app { padding: 84px 30px 30px; display: flex; flex-direction: column; gap: 18px; font-size: 20px; }
+  .appbar { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 600; font-size: 22px; }
+  .appbar img { width: 30px; }
+  .app h4 { font-family: var(--display); font-size: 32px; line-height: 1.1; letter-spacing: -0.025em; font-weight: 700; }
+  .field { border: 1.5px solid #d2d2d7; border-radius: 18px; padding: 18px; font-size: 19px; line-height: 1.45; color: var(--text); background: #fff; }
+  .field .caret { display: inline-block; width: 2px; height: 22px; background: var(--brand); vertical-align: -4px; margin-left: 2px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip { padding: 8px 14px; border-radius: 980px; background: #fff0f3; color: #e0204a; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .chip.gray { background: #f5f5f7; color: #1d1d1f; font-weight: 500; }
+  .label { font-size: 15px; font-weight: 600; color: var(--text-3); letter-spacing: .02em; text-transform: uppercase; }
+  .btn-app { height: 56px; border-radius: 16px; background: var(--brand-grad); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 20px; }
+
+  .match { display: flex; flex-direction: column; gap: 10px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .match:last-child { border-bottom: 0; }
+  .match-row { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--display); font-weight: 600; letter-spacing: -0.015em; }
+  .bar { height: 10px; border-radius: 10px; background: #f0f0f3; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: inherit; background: var(--brand-grad); }
+
+  /* cards */
+  .card { background: #fff; border-radius: 40px; box-shadow: 0 30px 80px rgba(0,0,0,.08); }
+  .dark .card { background: #1d1d1f; box-shadow: none; }
+
+  .check { display: flex; align-items: center; gap: 18px; font-size: 30px; letter-spacing: -0.015em; padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .check:last-child { border-bottom: 0; }
+  .check .ic { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 700; }
+  .ic.ok { background: #30d158; color: #000; }
+  .ic.todo { box-shadow: inset 0 0 0 3px var(--brand); color: var(--brand); }
+  .dark .ic.todo { box-shadow: inset 0 0 0 3px #ff5a7a; color: #ff5a7a; }
+
+  .stats { display: flex; gap: 0; }
+  .stat { flex: 1; padding-right: 30px; }
+  .stat + .stat { padding-left: 30px; border-left: 1px solid var(--line); }
+  .stat b { display: block; font-family: var(--display); font-weight: 700; letter-spacing: -0.035em; line-height: 1; }
+  .stat span { display: block; margin-top: 10px; color: var(--text-2); letter-spacing: -0.01em; }
+
+  .steps { display: flex; gap: 0; align-items: flex-start; }
+  .step { flex: 1; position: relative; padding-top: 52px; font-family: var(--display); font-size: 27px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; }
+  .step::before { content: ""; position: absolute; top: 8px; left: 0; width: 26px; height: 26px; border-radius: 50%; background: #fff; }
+  .step::after { content: ""; position: absolute; top: 20px; left: 26px; right: 0; height: 2px; background: rgba(255,255,255,.5); }
+  .step:last-child::after { display: none; }
+
+  .num { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: .02em; }
+  .dots { display: flex; gap: 12px; }
+  .dots i { width: 12px; height: 12px; border-radius: 12px; background: #d2d2d7; }
+  .dots i.on { width: 44px; background: var(--brand-grad); }
+  .dark .dots i { background: #424245; }
+  .dark .dots i.on { background: var(--brand-grad); }
+
+  .watermark { position: absolute; opacity: .06; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- =================== P01 · Brändi · 1080x1080 =================== -->
+<section class="post sq alt" id="p01-brandi">
+  <img src="assets/voon-mark.png" alt="" style="position:absolute; width:440px; left:50%; top:120px; transform:translateX(-50%);">
+  <div class="pad" style="justify-content:flex-end; align-items:center; text-align:center; padding-bottom:190px;">
+    <h1 class="h-xl">Osaaminen näkyviin.</h1>
+    <p class="sub" style="margin-top:22px;">Tekoäly, joka ymmärtää, mitä osaat.</p>
+  </div>
+  <div class="foot" style="justify-content:center; gap:28px;">
+    <img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ">
+    <span class="url muted">voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P02 · Ongelma · 1080x1350 =================== -->
+<section class="post pt dark" id="p02-ongelma">
+  <div class="pad" style="justify-content:center; padding-bottom:220px;">
+    <p class="eyebrow">Työllisyyskatsaus 8/2026</p>
+    <p class="h-xxl grad" style="margin-top:30px;">143 400</p>
+    <p class="h-m" style="margin-top:36px; max-width:840px;">ihmistä on ollut työttömänä vähintään vuoden.</p>
+    <p class="sub" style="margin-top:44px; max-width:820px;">Moni heistä osaa enemmän kuin ammattinimike kertoo. Tehdään osaaminen näkyväksi.</p>
+  </div>
+  <div class="foot">
+    <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
+    <span class="small">Lähde: KEHA-keskus, elokuu 2026</span>
+  </div>
+</section>
+
+<!-- =================== P03 · SkillPath: Kuvaile, älä etsi · 1080x1080 =================== -->
+<section class="post sq alt" id="p03-skillpath-kuvaile">
+  <div class="pad" style="padding-right:560px;">
+    <p class="eyebrow">SkillPath</p>
+    <h1 class="h-l" style="margin-top:18px;">Kuvaile,<br>älä etsi.</h1>
+    <p class="sub" style="margin-top:30px;">Kerro taustastasi omin sanoin. Tekoäly tunnistaa taitosi.</p>
+  </div>
+  <div class="foot" style="right:auto; flex-direction:column; align-items:flex-start; gap:10px;">
+    <span class="url">tyo.voon.fi</span>
+    <span class="small">Maksuton · suomi ja englanti</span>
+  </div>
+  <div class="phone" style="right:90px; top:150px;">
+    <div class="scr"><div class="island"></div>
+      <div class="app">
+        <div class="appbar"><img src="assets/voon-mark.png" alt="">SkillPath</div>
+        <h4>Kerro, mitä olet tehnyt.</h4>
+        <div class="field">Olen tehnyt kuusi vuotta ravintolan keittiössä. Vastasin myös tilauksista ja varastosta.<span class="caret"></span></div>
+        <div class="label" style="margin-top:6px;">Tunnistetut taidot · 6</div>
+        <div class="chips">
+          <span class="chip">Ruoanvalmistus</span>
+          <span class="chip">Elintarvikehygienia</span>
+          <span class="chip">Varastonhallinta</span>
+          <span class="chip">Tilausten käsittely</span>
+          <span class="chip">Tiimityö</span>
+          <span class="chip">Hävikin hallinta</span>
+        </div>
+        <div class="btn-app" style="margin-top:8px;">Näytä ammattiosumat</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== P04 · SkillPath: Ammattiosumat · 1080x1350 =================== -->
+<section class="post pt" id="p04-skillpath-osumat">
+  <div class="pad" style="align-items:center; text-align:center;">
+    <p class="eyebrow">SkillPath</p>
+    <h1 class="h-l" style="margin-top:18px;">Mihin osaamisesi riittää?</h1>
+    <p class="sub" style="margin-top:26px;">Näe ammattiosumat prosentteina.</p>
+  </div>
+  <div class="card" style="position:absolute; left:140px; right:140px; top:500px; padding:30px 56px; background:var(--bg-alt); box-shadow:none;">
+    <div class="match" style="padding:28px 0;"><div class="match-row" style="font-size:38px;"><span>Kokki</span><span class="grad">86 %</span></div><div class="bar" style="height:14px;"><i style="width:86%"></i></div></div>
+    <div class="match" style="padding:28px 0;"><div class="match-row" style="font-size:38px;"><span>Varastotyöntekijä</span><span class="grad">74 %</span></div><div class="bar" style="height:14px;"><i style="width:74%"></i></div></div>
+    <div class="match" style="padding:28px 0;"><div class="match-row" style="font-size:38px;"><span>Keittiöpäällikkö</span><span class="grad">61 %</span></div><div class="bar" style="height:14px;"><i style="width:61%"></i></div></div>
+    <div class="match" style="padding:28px 0;"><div class="match-row" style="font-size:38px;"><span>Hankinta-assistentti</span><span class="grad">52 %</span></div><div class="bar" style="height:14px;"><i style="width:52%"></i></div></div>
+  </div>
+  <div class="foot">
+    <img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ">
+    <span class="url">tyo.voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P05 · SkillPath: Taitoaukot · 1080x1080 =================== -->
+<section class="post sq dark" id="p05-skillpath-taitoaukot">
+  <div class="pad">
+    <p class="eyebrow">SkillPath</p>
+    <h1 class="h-l" style="margin-top:18px;">Tiedä, mitä oppia<br>seuraavaksi.</h1>
+  </div>
+  <div class="card" style="position:absolute; left:96px; right:96px; top:420px; padding:20px 48px;">
+    <div class="check"><span class="ic ok">✓</span>Ruoanvalmistus</div>
+    <div class="check"><span class="ic ok">✓</span>Elintarvikehygienia</div>
+    <div class="check"><span class="ic todo">+</span>Erityisruokavaliot <span class="muted" style="margin-left:auto; font-size:24px;">Opi seuraavaksi</span></div>
+    <div class="check"><span class="ic todo">+</span>Ruokalistan suunnittelu <span class="muted" style="margin-left:auto; font-size:24px;">Opi seuraavaksi</span></div>
+  </div>
+  <div class="foot">
+    <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
+    <span class="url">tyo.voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P06 · Talent Factory: CV · 1080x1350 =================== -->
+<section class="post pt alt" id="p06-talent-factory-cv">
+  <div class="pad">
+    <p class="eyebrow">Talent Factory</p>
+    <h1 class="h-l" style="margin-top:18px;">Osaamisesi.<br>Suomalaisen työnantajan kielellä.</h1>
+    <p class="sub" style="margin-top:28px; max-width:820px;">ESCO-pohjainen CV-työkalu Suomeen muuttaneille.</p>
+  </div>
+  <div class="card" style="position:absolute; left:96px; right:96px; top:640px; padding:48px 56px;">
+    <div style="display:flex; align-items:center; gap:24px;">
+      <div style="width:84px; height:84px; border-radius:50%; background:var(--brand-grad); color:#fff; display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:32px;">AM</div>
+      <div>
+        <div style="font-family:var(--display); font-weight:700; font-size:38px; letter-spacing:-0.025em;">Ana M.</div>
+        <div style="font-size:26px; color:var(--text-2);">Ohjelmistokehittäjä · 8 vuotta kokemusta</div>
+      </div>
+    </div>
+    <div class="label" style="margin-top:36px; font-size:19px;">Taidot · ESCO</div>
+    <div class="chips" style="margin-top:14px; gap:12px;">
+      <span class="chip gray" style="font-size:24px; padding:10px 18px;">JavaScript</span>
+      <span class="chip gray" style="font-size:24px; padding:10px 18px;">SQL</span>
+      <span class="chip gray" style="font-size:24px; padding:10px 18px;">Ohjelmistotestaus</span>
+      <span class="chip gray" style="font-size:24px; padding:10px 18px;">Versionhallinta</span>
+    </div>
+    <div style="margin-top:32px; padding:24px 28px; border-radius:24px; background:#fff0f3; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+      <div style="font-size:25px; line-height:1.35;"><b style="color:#e0204a;">Suositus</b><br>Lisää taito: Ketterä kehitys</div>
+      <span class="chip" style="background:#e0204a; color:#fff; font-size:22px; padding:10px 20px;">+ Lisää</span>
+    </div>
+  </div>
+  <div class="foot">
+    <img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ">
+    <span class="url">worklife.voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P07 · Talent Pathway · 1080x1080 =================== -->
+<section class="post sq brandbg" id="p07-talent-pathway">
+  <img class="watermark" src="assets/voon-mark-white.png" alt="" style="width:900px; right:-260px; top:-160px; opacity:.12;">
+  <div class="pad">
+    <p class="eyebrow">Talent Pathway · Uusi</p>
+    <h1 class="h-xl" style="margin-top:22px;">Opiskelupaikasta työuraan.</h1>
+    <p class="sub" style="margin-top:30px; max-width:800px;">Vaiheittainen polku kansainvälisille opiskelijoille ja heidän perheilleen.</p>
+  </div>
+  <div class="steps" style="position:absolute; left:96px; right:96px; top:690px;">
+    <div class="step">Ennen<br>saapumista</div>
+    <div class="step">Perhe<br>mukaan</div>
+    <div class="step">Harjoittelu</div>
+    <div class="step">Työura<br>alueella</div>
+  </div>
+  <div class="foot">
+    <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ" style="filter:none;">
+    <span class="url">worklife.voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P08 · BizPulse · 1080x1350 =================== -->
+<section class="post pt" id="p08-bizpulse">
+  <div class="pad">
+    <p class="eyebrow">BizPulse</p>
+    <h1 class="h-l" style="margin-top:18px;">Kuva laskusta.<br>Loput hoituu.</h1>
+    <p class="sub" style="margin-top:28px; max-width:880px;">Kevyt toiminnanohjaus pk-yrityksille, freelancereille ja konsulteille.</p>
+  </div>
+  <div class="phone" style="left:50%; transform:translateX(-50%); top:560px; height:900px;">
+    <div class="scr" style="background:#f5f5f7;"><div class="island"></div>
+      <div class="app">
+        <div class="appbar"><img src="assets/voon-mark.png" alt="">BizPulse</div>
+        <div style="background:#fff; border-radius:22px; padding:22px; display:flex; flex-direction:column; gap:14px;">
+          <div class="label">Luettu kuvasta</div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:#6e6e73;">Toimittaja</span><b>Keski-Suomen Tukku Oy</b></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:#6e6e73;">Summa</span><b>248,00 €</b></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:#6e6e73;">Eräpäivä</span><b>14.11.2026</b></div>
+        </div>
+        <div style="background:#fff; border-radius:22px; padding:20px 22px; display:flex; align-items:center; gap:14px;">
+          <span style="width:34px; height:34px; border-radius:50%; background:#30d158; color:#fff; display:grid; place-items:center; font-weight:700;">✓</span>
+          <span>Eräpäivä lisätty kalenteriin</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute; left:0; right:0; bottom:0; height:420px; background:linear-gradient(rgba(255,255,255,0), #fff 50%);"></div>
+  <div class="foot">
+    <span class="cta">Pilotit nyt maksutta</span>
+    <span class="url">biz.voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P09 · Nordway · 1080x1080 =================== -->
+<section class="post sq" id="p09-nordway">
+  <div class="pad">
+    <p class="eyebrow">Nordway</p>
+    <h1 class="h-l" style="margin-top:18px;">Turkista Suomeen.<br>Askel kerrallaan.</h1>
+    <p class="sub" style="margin-top:28px; max-width:860px;">Neuvontaa työhön, yrittäjyyteen, opiskeluun ja perheenyhdistämiseen.</p>
+  </div>
+  <svg viewBox="0 0 888 330" style="position:absolute; left:96px; top:580px; width:888px; height:330px;">
+    <defs><linearGradient id="g9" x1="0" x2="1"><stop offset="0" stop-color="#fb2b3b"/><stop offset="1" stop-color="#fd4180"/></linearGradient></defs>
+    <path d="M60 240 C 260 240, 300 60, 828 60" fill="none" stroke="url(#g9)" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 18"/>
+    <circle cx="60" cy="240" r="22" fill="#fb2b3b"/><circle cx="60" cy="240" r="40" fill="#fb2b3b" opacity=".15"/>
+    <circle cx="828" cy="60" r="22" fill="#fd4180"/><circle cx="828" cy="60" r="40" fill="#fd4180" opacity=".15"/>
+    <text x="60" y="310" text-anchor="middle" font-family="Inter Display" font-weight="700" font-size="38" fill="#1d1d1f" letter-spacing="-1">Turkki</text>
+    <text x="828" y="140" text-anchor="middle" font-family="Inter Display" font-weight="700" font-size="38" fill="#1d1d1f" letter-spacing="-1">Suomi</text>
+  </svg>
+  <div class="foot">
+    <img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ">
+    <span class="url">nordway.voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P10 · B2G LinkedIn · 1200x627 =================== -->
+<section class="post li alt" id="p10-linkedin-tyollisyysalueet">
+  <div style="position:absolute; inset:0; padding:64px 72px; display:flex; flex-direction:column;">
+    <p class="eyebrow" style="font-size:26px;">Työllisyysalueille ja kotoutumispalveluille</p>
+    <h1 class="h-m" style="margin-top:14px; font-size:68px; max-width:900px;">Yksi yhteinen kieli osaamiselle.</h1>
+    <div class="stats" style="margin-top:44px; max-width:860px;">
+      <div class="stat"><b class="grad" style="font-size:60px;">13 939</b><span style="font-size:22px;">taitoa</span></div>
+      <div class="stat"><b class="grad" style="font-size:60px;">3 039</b><span style="font-size:22px;">ammattia</span></div>
+      <div class="stat"><b class="grad" style="font-size:60px;">28</b><span style="font-size:22px;">kieltä · EU:n ESCO</span></div>
+    </div>
+    <div style="margin-top:auto; display:flex; align-items:center; justify-content:space-between;">
+      <span class="cta" style="height:62px; font-size:24px; padding:0 32px;">Hae pilottiasiakkaaksi</span>
+      <img src="assets/voon-logo-color.png" alt="VOON IQ" style="height:38px;">
+    </div>
+  </div>
+  <img src="assets/voon-mark.png" alt="" style="position:absolute; width:300px; right:56px; top:56px; opacity:.9;">
+</section>
+
+<!-- =================== P11 · Perustaja · 1080x1350 =================== -->
+<section class="post pt dark" id="p11-perustaja">
+  <div class="pad" style="justify-content:center; padding-bottom:260px;">
+    <div style="font-family:var(--display); font-size:220px; line-height:.6; font-weight:700;" class="grad">“</div>
+    <p class="h-m" style="margin-top:20px; font-size:72px;">Rakennan palvelut, joita kaipasin itse ohjaajana.</p>
+    <div style="margin-top:60px; display:flex; align-items:center; gap:28px;">
+      <div style="width:100px; height:100px; border-radius:50%; background:var(--brand-grad); display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:38px; color:#fff;">CY</div>
+      <div>
+        <div style="font-family:var(--display); font-weight:700; font-size:36px; letter-spacing:-0.02em;">Cenk Yakinlar</div>
+        <div style="font-size:26px; color:var(--text-2);">Perustaja ja toimitusjohtaja, VOON IQ</div>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:56px; font-size:32px; max-width:860px;">Lähes yhdeksän vuotta työllisyys- ja maahanmuuttopalveluissa Jyväskylässä.</p>
+  </div>
+  <div class="foot">
+    <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
+    <span class="url">voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P12 · Story: SkillPath · 1080x1920 =================== -->
+<section class="post st alt" id="p12-story-skillpath">
+  <div style="position:absolute; top:250px; left:96px; right:96px; text-align:center;">
+    <p class="eyebrow">SkillPath</p>
+    <h1 class="h-xl" style="margin-top:22px;">Mitä minun kannattaa oppia seuraavaksi?</h1>
+  </div>
+  <div class="phone" style="left:50%; transform:translateX(-50%); top:700px; height:720px;">
+    <div class="scr"><div class="island"></div>
+      <div class="app">
+        <div class="appbar"><img src="assets/voon-mark.png" alt="">SkillPath</div>
+        <h4>Ammattiosumasi</h4>
+        <div class="match"><div class="match-row" style="font-size:24px;"><span>Kokki</span><span class="grad">86 %</span></div><div class="bar"><i style="width:86%"></i></div></div>
+        <div class="match"><div class="match-row" style="font-size:24px;"><span>Varastotyöntekijä</span><span class="grad">74 %</span></div><div class="bar"><i style="width:74%"></i></div></div>
+        <div class="label" style="margin-top:6px;">Opi seuraavaksi</div>
+        <div class="chips"><span class="chip">Erityisruokavaliot</span><span class="chip">Ruokalistan suunnittelu</span></div>
+        <div class="label" style="margin-top:6px;">Tutkintoon johtava polku</div>
+        <div class="field" style="font-size:18px;">Hotelli-, ravintola- ja catering-alan perustutkinto</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="position:absolute; left:0; right:0; bottom:270px; display:flex; flex-direction:column; align-items:center; gap:24px;">
+    <span class="cta" style="height:96px; font-size:38px; padding:0 56px;">Kokeile maksutta <span class="chev"></span></span>
+    <span class="url" style="font-size:34px;">tyo.voon.fi</span>
+  </div>
+</section>
+
+<!-- =================== P13 · Story: Tekoälypalvelut · 1080x1920 =================== -->
+<section class="post st dark" id="p13-story-tekoaly-yrityksille">
+  <img class="watermark" src="assets/voon-mark-white.png" alt="" style="width:1300px; left:-110px; top:520px; opacity:.07;">
+  <div style="position:absolute; top:300px; left:96px; right:96px;">
+    <p class="eyebrow">Tekoälypalvelut yrityksille</p>
+    <h1 class="h-xl" style="margin-top:26px; font-size:124px;">Tekoäly käyttöön.<br><span class="grad">Hallitusti.</span></h1>
+  </div>
+  <div style="position:absolute; left:96px; right:96px; top:930px; display:flex; flex-direction:column;">
+    <div class="check" style="font-size:40px; padding:30px 0;"><span class="ic todo" style="width:52px; height:52px; font-size:26px;">1</span>Tekoälykartoitus</div>
+    <div class="check" style="font-size:40px; padding:30px 0;"><span class="ic todo" style="width:52px; height:52px; font-size:26px;">2</span>Prosessiautomaatio</div>
+    <div class="check" style="font-size:40px; padding:30px 0;"><span class="ic todo" style="width:52px; height:52px; font-size:26px;">3</span>Tietoturvalliset avustajat</div>
+  </div>
+  <div style="position:absolute; left:96px; right:96px; bottom:270px; display:flex; align-items:center; justify-content:space-between;">
+    <span class="cta" style="height:96px; font-size:36px; padding:0 52px;">Varaa kartoitus</span>
+    <img src="assets/voon-logo-white.png" alt="VOON IQ" style="height:52px;">
+  </div>
+</section>
+
+<!-- =================== P14 · LinkedIn-banneri · 1584x396 =================== -->
+<section class="post bn" id="p14-linkedin-banneri">
+  <div style="position:absolute; inset:0; background:linear-gradient(90deg, #fff 0%, #fff 48%, #f5f5f7 100%);"></div>
+  <img src="assets/voon-mark.png" alt="" style="position:absolute; width:340px; right:40px; top:28px;">
+  <div style="position:absolute; left:420px; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; gap:14px;">
+    <h1 class="h-m" style="font-size:74px;">Osaaminen näkyviin.</h1>
+    <p style="font-family:var(--display); font-size:26px; font-weight:500; color:var(--text-2); letter-spacing:-0.01em;">SkillPath · Talent Factory · BizPulse · Nordway</p><p class="url" style="font-size:28px;">voon.fi</p>
+  </div>
+</section>
+
+<!-- =================== C1–C5 · Karuselli: Näin SkillPath toimii · 1080x1350 =================== -->
+<section class="post pt brandbg" id="c1-karuselli-kansi">
+  <img class="watermark" src="assets/voon-mark-white.png" alt="" style="width:1100px; right:-380px; bottom:-120px; opacity:.13;">
+  <div class="pad" style="justify-content:center; padding-bottom:200px;">
+    <p class="eyebrow">SkillPath</p>
+    <h1 class="h-xl" style="margin-top:24px; font-size:128px;">Näin SkillPath toimii.</h1>
+    <p class="sub" style="margin-top:36px;">Viisi askelta osaamisesta ammattiin.</p>
+  </div>
+  <div class="foot">
+    <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
+    <span class="url">Pyyhkäise <span class="chev"></span></span>
+  </div>
+</section>
+
+<section class="post pt" id="c2-karuselli-kuvaile">
+  <div class="pad">
+    <span class="num grad">01</span>
+    <h1 class="h-l" style="margin-top:20px;">Kuvaile, älä etsi.</h1>
+    <p class="sub" style="margin-top:26px; max-width:860px;">Kerro taustastasi omin sanoin. Sinun ei tarvitse tuntea tuhansia taitonimikkeitä.</p>
+  </div>
+  <div class="card" style="position:absolute; left:96px; right:96px; top:620px; padding:48px; background:var(--bg-alt); box-shadow:none;">
+    <div class="field" style="font-size:32px; padding:32px; border-radius:28px; border:0;">Hoidin kotimaassani pientä kauppaa: kassa, tilaukset ja asiakaspalvelu.<span class="caret" style="height:34px;"></span></div>
+  </div>
+  <div class="foot"><div class="dots"><i></i><i class="on"></i><i></i><i></i><i></i></div><img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ"></div>
+</section>
+
+<section class="post pt" id="c3-karuselli-taidot">
+  <div class="pad">
+    <span class="num grad">02</span>
+    <h1 class="h-l" style="margin-top:20px;">Tekoäly tunnistaa taidot.</h1>
+    <p class="sub" style="margin-top:26px; max-width:860px;">Taidot yhdistetään EU:n ESCO-luokitukseen – kieleen, jota työnantajat ja ohjaajat ymmärtävät.</p>
+  </div>
+  <div class="chips" style="position:absolute; left:96px; right:96px; top:650px; gap:18px;">
+    <span class="chip" style="font-size:34px; padding:16px 28px;">Asiakaspalvelu</span>
+    <span class="chip" style="font-size:34px; padding:16px 28px;">Kassatyö</span>
+    <span class="chip" style="font-size:34px; padding:16px 28px;">Varastonhallinta</span>
+    <span class="chip" style="font-size:34px; padding:16px 28px;">Myynti</span>
+    <span class="chip" style="font-size:34px; padding:16px 28px;">Tilausten käsittely</span>
+  </div>
+  <div class="stats" style="position:absolute; left:96px; right:96px; top:960px;">
+    <div class="stat"><b class="grad" style="font-size:84px;">13 939</b><span style="font-size:28px;">taitoa</span></div>
+    <div class="stat"><b class="grad" style="font-size:84px;">3 039</b><span style="font-size:28px;">ammattia</span></div>
+  </div>
+  <div class="foot"><div class="dots"><i></i><i></i><i class="on"></i><i></i><i></i></div><img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ"></div>
+</section>
+
+<section class="post pt" id="c4-karuselli-osumat">
+  <div class="pad">
+    <span class="num grad">03 · 04</span>
+    <h1 class="h-l" style="margin-top:20px;">Osumat ja taitoaukot.</h1>
+    <p class="sub" style="margin-top:26px; max-width:860px;">Näet, mihin ammatteihin osaamisesi sopii – ja mitä kannattaa oppia lisää.</p>
+  </div>
+  <div class="card" style="position:absolute; left:96px; right:96px; top:610px; padding:24px 52px; background:var(--bg-alt); box-shadow:none;">
+    <div class="match" style="padding:26px 0;"><div class="match-row" style="font-size:36px;"><span>Myyjä</span><span class="grad">82 %</span></div><div class="bar" style="height:14px;"><i style="width:82%"></i></div></div>
+    <div class="match" style="padding:26px 0;"><div class="match-row" style="font-size:36px;"><span>Kassatyöntekijä</span><span class="grad">78 %</span></div><div class="bar" style="height:14px;"><i style="width:78%"></i></div></div>
+    <div class="check" style="border-top:1px solid var(--line); border-bottom:0; padding-top:28px;"><span class="ic todo">+</span>Opi seuraavaksi: Verkkokauppa</div>
+  </div>
+  <div class="foot"><div class="dots"><i></i><i></i><i></i><i class="on"></i><i></i></div><img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ"></div>
+</section>
+
+<section class="post pt dark" id="c5-karuselli-polku">
+  <div class="pad">
+    <span class="num grad">05</span>
+    <h1 class="h-l" style="margin-top:20px;">Polku koulutukseen.</h1>
+    <p class="sub" style="margin-top:26px; max-width:860px;">Opetushallituksen ePerusteet yhdistettynä ESCO-ammatteihin ja -taitoihin.</p>
+  </div>
+  <div style="position:absolute; left:96px; right:96px; top:600px;">
+    <p class="h-xxl grad" style="font-size:240px;">328</p>
+    <p class="h-m" style="margin-top:16px; font-size:52px;">ammatillista tutkintoa linkitetty.</p>
+  </div>
+  <div style="position:absolute; left:96px; right:96px; bottom:200px; display:flex; align-items:center; gap:30px;">
+    <span class="cta">Kokeile maksutta <span class="chev"></span></span>
+    <span class="url">tyo.voon.fi</span>
+  </div>
+  <div class="foot"><div class="dots"><i></i><i></i><i></i><i></i><i class="on"></i></div><img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ"></div>
+</section>
+
+</body>
+</html>
