@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apple-inspired Design System — Demo</title>
+  <link rel="stylesheet" href="apple-inspired.css">
+</head>
+<body>
+  <a class="ds-skip-link" href="#main">İçeriğe geç</a>
+
+  <nav class="ds-nav" aria-label="Genel">
+    <div class="ds-nav__inner">
+      <a class="ds-nav__logo" href="#"><strong>Marka</strong></a>
+      <ul class="ds-nav__list">
+        <li><a class="ds-nav__link" href="#">Ürünler</a></li>
+        <li><a class="ds-nav__link" href="#">Çözümler</a></li>
+        <li><a class="ds-nav__link" href="#">Fiyatlar</a></li>
+        <li><a class="ds-nav__link" href="#">Destek</a></li>
+      </ul>
+      <div class="ds-nav__actions">
+        <button class="ds-btn ds-btn--sm" type="button">Başla</button>
+        <button class="ds-btn ds-btn--sm ds-btn--neutral" type="button"
+          onclick="document.documentElement.classList.toggle('dark')">Tema</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="ds-ribbon">Yeni sürüm yayında. <a class="ds-link ds-link--more" href="#">Daha fazla bilgi</a></div>
+
+  <main id="main">
+    <section class="ds-tiles ds-tiles--flush">
+      <div class="ds-tile ds-tile--alt">
+        <div class="ds-tile__copy ds-reveal">
+          <h1 class="ds-tile__headline">Ürün Pro</h1>
+          <p class="ds-tile__subhead">Daha az çaba. Daha çok sonuç.</p>
+          <div class="ds-tile__ctas">
+            <a class="ds-btn" href="#">Daha fazla bilgi</a>
+            <a class="ds-btn ds-btn--secondary" href="#">Satın al</a>
+          </div>
+        </div>
+        <div class="ds-tile__media"></div>
+      </div>
+      <div class="ds-tile ds-tile--dark ds-theme-dark">
+        <div class="ds-tile__copy ds-reveal">
+          <h2 class="ds-tile__headline">Ürün Air</h2>
+          <p class="ds-tile__subhead">Hafif. Hızlı. Hazır.</p>
+          <div class="ds-tile__ctas">
+            <a class="ds-btn" href="#">Daha fazla bilgi</a>
+            <a class="ds-btn ds-btn--secondary" href="#">Satın al</a>
+          </div>
+        </div>
+        <div class="ds-tile__media"></div>
+      </div>
+    </section>
+
+    <section class="ds-tiles ds-tiles--split">
+      <div class="ds-tile ds-tile--alt">
+        <div class="ds-tile__copy">
+          <h2 class="ds-tile__headline">Mini</h2>
+          <p class="ds-tile__subhead">Cebe sığan güç.</p>
+          <div class="ds-tile__ctas"><a class="ds-btn" href="#">Daha fazla bilgi</a></div>
+        </div>
+      </div>
+      <div class="ds-tile ds-tile--alt">
+        <div class="ds-tile__copy">
+          <span class="ds-eyebrow ds-eyebrow--accent">Yeni</span>
+          <h2 class="ds-tile__headline">Studio</h2>
+          <p class="ds-tile__subhead">Profesyoneller için.</p>
+          <div class="ds-tile__ctas"><a class="ds-btn ds-btn--secondary" href="#">Satın al</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-section">
+      <div class="ds-container">
+        <header class="ds-section-header">
+          <h2 class="ds-headline">Neden bu ürün?</h2>
+          <p class="ds-lead">Her detay tek bir amaca hizmet eder: işinizi kolaylaştırmak.</p>
+        </header>
+        <div class="ds-grid ds-grid--3 ds-stagger">
+          <div class="ds-feature ds-reveal"><p class="ds-stat">2x</p><p class="ds-feature__title">Daha hızlı</p><p class="ds-feature__text">Önceki nesile göre iki kat performans.</p></div>
+          <div class="ds-feature ds-reveal"><p class="ds-stat">18 sa</p><p class="ds-feature__title">Pil ömrü</p><p class="ds-feature__text">Gün boyu, şarj aleti olmadan.</p></div>
+          <div class="ds-feature ds-reveal"><p class="ds-stat">%40</p><p class="ds-feature__title">Daha hafif</p><p class="ds-feature__text">Her yere götürmek için tasarlandı.</p></div>
+        </div>
+        <p class="ds-highlight-copy ds-max-narrow ds-mx-auto ds-mt-10">Yeni çip ile <strong>her uygulama anında açılır</strong>, uzun projeler bile akıcı ilerler.</p>
+      </div>
+    </section>
+
+    <section class="ds-section ds-section--alt">
+      <div class="ds-container">
+        <div class="ds-grid ds-grid--3">
+          <article class="ds-card ds-card--interactive">
+            <div class="ds-card__media ds-bg-alt"></div>
+            <div class="ds-card__body">
+              <span class="ds-card__eyebrow">Yeni</span>
+              <h3 class="ds-card__title">Kart başlığı</h3>
+              <p class="ds-card__text">Kısa ve net bir açıklama.</p>
+            </div>
+            <div class="ds-card__footer"><span class="ds-price">₺49.999<span class="ds-price__note">veya ₺4.166/ay</span></span><a class="ds-btn ds-btn--md" href="#">Satın al</a></div>
+          </article>
+          <article class="ds-card">
+            <div class="ds-card__body">
+              <h3 class="ds-card__title">Form</h3>
+              <div class="ds-float"><input class="ds-input" id="email" placeholder=" "><label for="email">E-posta</label></div>
+              <div class="ds-field"><label class="ds-label" for="m">Model</label><select class="ds-select" id="m"><option>Pro</option><option>Air</option></select></div>
+              <label class="ds-check"><input type="checkbox" checked> Bülten aboneliği</label>
+              <div class="ds-cluster ds-cluster--between"><span>Bildirimler</span><input class="ds-switch" type="checkbox" role="switch" checked aria-label="Bildirimler"></div>
+            </div>
+          </article>
+          <article class="ds-card">
+            <div class="ds-card__body">
+              <h3 class="ds-card__title">Kontroller</h3>
+              <div class="ds-segmented" role="radiogroup">
+                <label><input type="radio" name="p" checked><span>Aylık</span></label>
+                <label><input type="radio" name="p"><span>Yıllık</span></label>
+              </div>
+              <div class="ds-cluster ds-cluster--sm">
+                <button class="ds-chip" aria-pressed="true">Tümü</button>
+                <button class="ds-chip" aria-pressed="false">Dizüstü</button>
+                <button class="ds-chip" aria-pressed="false">Masaüstü</button>
+              </div>
+              <div class="ds-cluster ds-cluster--sm">
+                <span class="ds-badge ds-badge--accent">Bilgi</span>
+                <span class="ds-badge ds-badge--success">Stokta</span>
+                <span class="ds-badge ds-badge--warning">Az kaldı</span>
+                <span class="ds-badge ds-badge--danger">Tükendi</span>
+              </div>
+              <div class="ds-progress" style="--ds-progress: 64%"><div class="ds-progress__bar"></div></div>
+              <div class="ds-cluster"><button class="ds-btn ds-btn--dark ds-btn--md">Koyu</button><button class="ds-btn ds-btn--neutral ds-btn--md">Nötr</button><button class="ds-btn ds-btn--ghost ds-btn--md">Ghost</button></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-section">
+      <div class="ds-container ds-container--narrow">
+        <h2 class="ds-title-2 ds-mb-7">Sıkça sorulan sorular</h2>
+        <div class="ds-accordion">
+          <details open><summary>Teslimat ne kadar sürer?</summary><div class="ds-accordion__content">Genellikle 1–3 iş günü.</div></details>
+          <details><summary>İade politikası nedir?</summary><div class="ds-accordion__content">14 gün içinde koşulsuz iade.</div></details>
+        </div>
+        <dl class="ds-specs ds-mt-10">
+          <dt>Ekran</dt><dd>13,6 inç Liquid Retina ekran</dd>
+          <dt>Ağırlık</dt><dd>1,24 kg</dd>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ds-footer">
+    <div class="ds-container">
+      <div class="ds-footer__notes"><p>1. Dipnot örneği. Testler ön üretim donanımıyla yapılmıştır.</p></div>
+      <div class="ds-footer__directory">
+        <div><p class="ds-footer__heading">Keşfet</p><ul class="ds-footer__list"><li><a href="#">Ürünler</a></li><li><a href="#">Aksesuarlar</a></li></ul></div>
+        <div><p class="ds-footer__heading">Hesap</p><ul class="ds-footer__list"><li><a href="#">Hesabım</a></li><li><a href="#">Siparişler</a></li></ul></div>
+        <div><p class="ds-footer__heading">Destek</p><ul class="ds-footer__list"><li><a href="#">İletişim</a></li></ul></div>
+        <div><p class="ds-footer__heading">Şirket</p><ul class="ds-footer__list"><li><a href="#">Hakkımızda</a></li></ul></div>
+        <div><p class="ds-footer__heading">Yasal</p><ul class="ds-footer__list"><li><a href="#">Gizlilik</a></li></ul></div>
+      </div>
+      <div class="ds-footer__legal"><span>Copyright © 2026 Marka. Tüm hakları saklıdır.</span><span class="ds-footer__legal-links"><a href="#">Gizlilik</a><a href="#">Kullanım Koşulları</a></span></div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.ds-reveal').forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>
