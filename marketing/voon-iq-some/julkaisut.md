@@ -158,3 +158,46 @@ Linkkitarra: voon.fi · Teksti: ”Aloitamme mitattavasta tarpeesta.”
 - P02:n luku (143 400) ja lähde ovat liiketoimintasuunnitelmasta – tarkista ennen julkaisua uusin työllisyyskatsaus.
 - P11:n lainaus on luonnos: hyväksy tai muotoile omin sanoin.
 - Käyttöliittymäkuvien esimerkkihenkilöt ja -tiedot (Ana M., ammattiosumat, laskun tiedot) ovat havainnollistavia.
+
+---
+
+## Reels / TikTok (1080×1920, 9 s, 30 fps)
+
+Tiedostot: `reels/*.mp4` (video) ja `reels/*.png` (kansikuva) · Lähde: `reels.html` · Renderöinti: `node render-reels.js` (vaatii ffmpegin)
+
+Videot ovat äänettömiä: lisää musiikki sovelluksessa (TikTokin / Instagramin lisensoitu musiikkikirjasto).
+Sisältö pysyy turva-alueella: ylhäällä 200 px, alhaalla 420 px ja oikealla 140 px jäävät sovelluksen painikkeille.
+
+| Video | Palvelu | Väri | Otsikko |
+|---|---|---|---|
+| reel-1 | Talent Pathway | brändipinkki | Opiskelupaikasta työuraan. |
+| reel-2 | SkillPath | violetti | Osaamisesta ammattiin. |
+| reel-3 | Talent Factory | petrooli | CV, jonka suomalainen työnantaja ymmärtää. |
+| reel-4 | BizPulse | musta | Vähemmän hallintoa. Enemmän aikaa. |
+| reel-5 | Nordway | pohjoisen sininen | Turkista Suomeen. |
+| reel-6 | Tekoälypalvelut | vaalea | Tekoäly käyttöön. Hallitusti. |
+
+### reel-1 · Talent Pathway
+Opiskelupaikasta työuraan – askel kerrallaan. Talent Pathway auttaa kansainvälisiä opiskelijoita ja heidän perheitään juurtumaan Suomeen. 🎓➡️💼 worklife.voon.fi
+#TalentPathway #opiskeluSuomessa #kansainvälinenopiskelija #työSuomessa #VOONIQ
+
+### reel-2 · SkillPath
+Mihin osaamisesi riittää? Kerro omin sanoin, mitä olet tehnyt – SkillPath näyttää sopivat ammatit, taitoaukot ja koulutukset. Maksuton. tyo.voon.fi
+#SkillPath #työnhaku #urasuunnittelu #tekoäly #VOONIQ
+
+### reel-3 · Talent Factory
+Muutitko Suomeen? Tee CV, jonka suomalainen työnantaja ymmärtää. Taidot EU-standardilla, suositukset mukana. worklife.voon.fi
+#TalentFactory #muuttoSuomeen #CV #työnhakuSuomessa #VOONIQ
+
+### reel-4 · BizPulse
+Kuva laskusta – BizPulse hoitaa loput. Eräpäivät kalenteriin ja talousraportti sähköpostiin joka aamu. Pilotit nyt maksutta. biz.voon.fi
+#BizPulse #yrittäjä #pkyritys #automaatio #VOONIQ
+
+### reel-5 · Nordway
+Turkista Suomeen? Nordway neuvoo työssä, yrittäjyydessä, opiskelussa ja perheenyhdistämisessä. nordway.voon.fi
+(Nordway ei ole viranomainen eikä oikeudellinen edustaja.)
+#Nordway #muuttoSuomeen #Turkki #Suomi #VOONIQ
+
+### reel-6 · Tekoälypalvelut
+Tekoäly käyttöön – hallitusti. Kartoitus, kokeilu ja käyttöönotto käyttöoikeuksineen ja lokeineen. Aloitamme mitattavasta tarpeesta. voon.fi
+#tekoäly #pkyritys #automaatio #digitalisaatio #VOONIQ
