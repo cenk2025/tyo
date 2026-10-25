@@ -161,21 +161,23 @@ Linkkitarra: voon.fi · Teksti: ”Aloitamme mitattavasta tarpeesta.”
 
 ---
 
-## Reels / TikTok (1080×1920, 9 s, 30 fps)
+## Reels / TikTok (1080×1920, 10 s, 30 fps)
 
 Tiedostot: `reels/*.mp4` (video) ja `reels/*.png` (kansikuva) · Lähde: `reels.html` · Renderöinti: `node render-reels.js` (vaatii ffmpegin)
 
 Videot ovat äänettömiä: lisää musiikki sovelluksessa (TikTokin / Instagramin lisensoitu musiikkikirjasto).
-Sisältö pysyy turva-alueella: ylhäällä 200 px, alhaalla 420 px ja oikealla 140 px jäävät sovelluksen painikkeille.
+Sisältö pysyy turva-alueella: ylhäällä 300 px (välilehdet ja mainosbanneri), alhaalla 420 px ja oikealla 150 px jäävät sovelluksen käyttöliittymälle.
+Apple-linja: taustat vain mustaa, valkoista tai #F5F5F7; ainoa väri on VOON IQ:n gradientti korostussanassa, pisteissä ja CTA:ssa.
+Rakenne: otsikko → alaotsikko (1–4 s) → askeleet samalla paikalla (5–7 s) → CTA (7–10 s).
 
 | Video | Palvelu | Väri | Otsikko |
 |---|---|---|---|
-| reel-1 | Talent Pathway | brändipinkki | Opiskelupaikasta työuraan. |
-| reel-2 | SkillPath | violetti | Osaamisesta ammattiin. |
-| reel-3 | Talent Factory | petrooli | CV, jonka suomalainen työnantaja ymmärtää. |
-| reel-4 | BizPulse | musta | Vähemmän hallintoa. Enemmän aikaa. |
-| reel-5 | Nordway | pohjoisen sininen | Turkista Suomeen. |
-| reel-6 | Tekoälypalvelut | vaalea | Tekoäly käyttöön. Hallitusti. |
+| reel-1 | Talent Pathway | musta | Opiskelupaikasta työuraan. |
+| reel-2 | SkillPath | vaaleanharmaa | Osaamisesta ammattiin. |
+| reel-3 | Talent Factory | musta | CV, jonka työnantaja ymmärtää. |
+| reel-4 | BizPulse | valkoinen | Vähemmän hallintoa. Enemmän aikaa. |
+| reel-5 | Nordway | musta | Turkista Suomeen. |
+| reel-6 | Tekoälypalvelut | vaaleanharmaa | Tekoäly käyttöön. Hallitusti. |
 
 ### reel-1 · Talent Pathway
 Opiskelupaikasta työuraan – askel kerrallaan. Talent Pathway auttaa kansainvälisiä opiskelijoita ja heidän perheitään juurtumaan Suomeen. 🎓➡️💼 worklife.voon.fi

@@ -9,58 +9,60 @@
   body.solo { padding: 0; gap: 0; }
   body.solo .reel:not(.on) { display: none; }
 
-  /* Turvallinen alue: TikTok/Reels-käyttöliittymä peittää ylä- (~200px), ala- (~420px) ja oikean reunan (~140px). */
+  /*
+    Apple-linja: taustat vain mustaa, valkoista tai #f5f5f7. Ainoa väri on VOON IQ:n gradientti
+    (korostussana, pisteet, CTA).
+    Turva-alue: TikTokin yläosan välilehdet ja mainosbanneri peittävät ~300 px ylhäältä,
+    kuvateksti ja painikkeet ~420 px alhaalta ja ~150 px oikealta.
+  */
   .reel {
-    --fg: #fff;
-    --fg-2: rgba(255,255,255,.82);
-    --line: rgba(255,255,255,.45);
-    --dot: #fff;
-    --cta-bg: #fff;
-    --cta-fg: #fd355d;
-    --mark-op: .12;
-    --h: 112px;
+    --grad: linear-gradient(90deg, #fb2b3b, #fd4180);
+    --fg: #f5f5f7;
+    --fg-2: #a1a1a6;
+    --line: #424245;
+    --bg: #000;
+    --mark-op: .07;
     position: relative; width: 1080px; height: 1920px; overflow: hidden; flex: none;
     color: var(--fg); background: var(--bg);
   }
+  .reel.light { --fg: #1d1d1f; --fg-2: #6e6e73; --line: #d2d2d7; --bg: #f5f5f7; --mark-op: .08; }
+  .reel.white { --fg: #1d1d1f; --fg-2: #6e6e73; --line: #d2d2d7; --bg: #fff; --mark-op: .08; }
 
-  .reel.pathway { --bg: linear-gradient(150deg, #fb2b3b 0%, #fd3a6a 55%, #fd4180 100%); --cta-fg: #fd355d; }
-  .reel.skillpath { --bg: linear-gradient(160deg, #3d22d6 0%, #6b35ee 100%); --cta-fg: #4a28df; }
-  .reel.factory { --bg: linear-gradient(160deg, #05524f 0%, #0b8577 100%); --cta-fg: #076b65; }
-  .reel.bizpulse { --bg: linear-gradient(160deg, #1d1d1f 0%, #000 100%); --cta-bg: linear-gradient(90deg, #fb2b3b, #fd4180); --cta-fg: #fff; --line: #424245; --fg-2: #a1a1a6; --mark-op: .08; }
-  .reel.nordway { --bg: linear-gradient(160deg, #08367f 0%, #1a6ad0 100%); --cta-fg: #0b4596; }
-  .reel.ai { --bg: #f5f5f7; --fg: #1d1d1f; --fg-2: #6e6e73; --line: #d2d2d7; --dot: #fd355d; --cta-bg: linear-gradient(90deg, #fb2b3b, #fd4180); --cta-fg: #fff; --mark-op: .09; }
+  .mark { position: absolute; width: 1500px; right: -640px; top: 520px; opacity: var(--mark-op); animation: drift 10s linear both; }
 
-  .mark { position: absolute; width: 1500px; right: -620px; top: 380px; opacity: var(--mark-op); animation: drift 9s linear both; }
-  .ai .mark, .bizpulse .mark { filter: none; }
+  .logo { position: absolute; left: 96px; top: 330px; height: 76px; animation: fade 500ms ease-out 0ms both; }
 
-  .logo { position: absolute; left: 96px; top: 220px; height: 50px; animation: fade 600ms ease-out 0ms both; }
-
-  .copy { position: absolute; left: 96px; right: 170px; top: 340px; }
-  .eyebrow { font-family: "Inter Display", "Inter"; font-size: 40px; font-weight: 600; letter-spacing: -0.01em; color: var(--fg-2); animation: up 700ms cubic-bezier(.28,.11,.32,1) 200ms both; }
-  .h { margin-top: 26px; font-family: "Inter Display", "Inter"; font-size: var(--h); font-weight: 700; line-height: 1.0; letter-spacing: -0.045em; }
-  .h .ln { display: block; animation: up 800ms cubic-bezier(.28,.11,.32,1) both; }
+  .copy { position: absolute; left: 96px; right: 150px; top: 470px; }
+  .eyebrow { font-family: "Inter Display", "Inter"; font-size: 48px; font-weight: 600; letter-spacing: -0.015em; color: var(--fg-2); animation: up 700ms cubic-bezier(.28,.11,.32,1) 200ms both; }
+  .h { margin-top: 22px; font-family: "Inter Display", "Inter"; font-size: var(--h, 128px); font-weight: 700; line-height: 1.0; letter-spacing: -0.045em; }
+  .h .ln { display: block; width: max-content; max-width: none; animation: up 800ms cubic-bezier(.28,.11,.32,1) both; }
   .h .ln:nth-child(1) { animation-delay: 400ms; }
   .h .ln:nth-child(2) { animation-delay: 560ms; }
   .h .ln:nth-child(3) { animation-delay: 720ms; }
-  .accent { background: linear-gradient(90deg, #fb2b3b, #fd4180); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .sub { margin-top: 34px; font-family: "Inter Display", "Inter"; font-size: 44px; font-weight: 500; line-height: 1.25; letter-spacing: -0.015em; color: var(--fg-2); animation: up 800ms cubic-bezier(.28,.11,.32,1) 1100ms both; }
+  .accent { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-  .steps { position: absolute; left: 96px; right: 170px; top: 920px; }
-  .steps .rail { position: absolute; left: 17.5px; top: 50px; width: 3px; height: 300px; background: var(--line); transform-origin: top; animation: grow 2400ms cubic-bezier(.65,0,.35,1) 1800ms both; }
-  .step { position: relative; display: flex; align-items: center; gap: 36px; height: 100px; font-family: "Inter Display", "Inter"; font-size: 46px; font-weight: 600; letter-spacing: -0.02em; }
-  .step i { flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 10px color-mix(in srgb, var(--dot) 18%, transparent); animation: pop 500ms cubic-bezier(.34,1.5,.64,1) both; }
+  /* Sama alue (960–1330 px) näyttää ensin alaotsikon ja sitten askeleet. */
+  .stage { position: absolute; left: 96px; right: 150px; top: 990px; height: 360px; }
+  .sub { font-family: "Inter Display", "Inter"; font-size: 58px; font-weight: 600; line-height: 1.18; letter-spacing: -0.025em; color: var(--fg-2);
+         animation: up 800ms cubic-bezier(.28,.11,.32,1) 1100ms both, out 500ms ease-in 4300ms forwards; }
+
+  .steps { position: absolute; inset: 0; }
+  .steps .rail { position: absolute; left: 20px; top: 45px; width: 4px; height: 270px; background: var(--line); transform-origin: top; animation: grow 1800ms cubic-bezier(.65,0,.35,1) 4800ms both; }
+  .step { position: relative; display: flex; align-items: center; gap: 40px; height: 90px; font-family: "Inter Display", "Inter"; font-size: 56px; font-weight: 600; letter-spacing: -0.025em; white-space: nowrap; }
+  .step i { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--grad); animation: pop 500ms cubic-bezier(.34,1.5,.64,1) both; }
   .step span { animation: side 600ms cubic-bezier(.28,.11,.32,1) both; }
-  .step:nth-child(2) i, .step:nth-child(2) span { animation-delay: 1800ms; }
-  .step:nth-child(3) i, .step:nth-child(3) span { animation-delay: 2600ms; }
-  .step:nth-child(4) i, .step:nth-child(4) span { animation-delay: 3400ms; }
-  .step:nth-child(5) i, .step:nth-child(5) span { animation-delay: 4200ms; }
+  .step:nth-child(2) i, .step:nth-child(2) span { animation-delay: 4800ms; }
+  .step:nth-child(3) i, .step:nth-child(3) span { animation-delay: 5400ms; }
+  .step:nth-child(4) i, .step:nth-child(4) span { animation-delay: 6000ms; }
+  .step:nth-child(5) i, .step:nth-child(5) span { animation-delay: 6600ms; }
 
-  .cta-wrap { position: absolute; left: 96px; right: 170px; top: 1390px; display: flex; align-items: center; gap: 34px; }
-  .cta { display: inline-flex; align-items: center; gap: 16px; height: 100px; padding: 0 52px; border-radius: 980px; background: var(--cta-bg); color: var(--cta-fg); font-family: "Inter Display", "Inter"; font-size: 40px; font-weight: 700; letter-spacing: -0.015em; animation: pop 600ms cubic-bezier(.34,1.4,.64,1) 4900ms both; }
-  .cta::after { content: ""; width: 16px; height: 16px; border-top: 4px solid currentColor; border-right: 4px solid currentColor; transform: rotate(45deg); }
-  .url { font-family: "Inter Display", "Inter"; font-size: 40px; font-weight: 600; letter-spacing: -0.01em; animation: fade 600ms ease-out 5200ms both; }
+  .cta-wrap { position: absolute; left: 96px; right: 150px; top: 1380px; display: flex; align-items: center; gap: 36px; }
+  .cta { display: inline-flex; align-items: center; gap: 18px; height: 112px; padding: 0 56px; border-radius: 980px; background: var(--grad); color: #fff; font-family: "Inter Display", "Inter"; font-size: 48px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; animation: pop 600ms cubic-bezier(.34,1.4,.64,1) 7300ms both; }
+  .cta::after { content: ""; width: 18px; height: 18px; border-top: 5px solid currentColor; border-right: 5px solid currentColor; transform: rotate(45deg); }
+  .url { font-family: "Inter Display", "Inter"; font-size: 46px; font-weight: 600; letter-spacing: -0.015em; white-space: nowrap; animation: fade 600ms ease-out 7600ms both; }
 
   @keyframes up   { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: none; } }
+  @keyframes out  { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-30px); } }
   @keyframes side { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
   @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pop  { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
@@ -70,121 +72,145 @@
 </head>
 <body>
 
-<!-- 1 · Talent Pathway · brändipinkki -->
-<section class="reel pathway" id="reel-1-talent-pathway" style="--h:104px;">
+<!-- 1 · Talent Pathway · musta -->
+<section class="reel" id="reel-1-talent-pathway">
   <img class="mark" src="assets/voon-mark-white.png" alt="">
   <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
   <div class="copy">
-    <p class="eyebrow">Talent Pathway · Uusi</p>
-    <h1 class="h"><span class="ln">Opiskelu­paikasta</span><span class="ln">työuraan.</span></h1>
-    <p class="sub">Vaiheittainen polku kansainvälisille opiskelijoille ja heidän perheilleen.</p>
+    <p class="eyebrow">Talent Pathway</p>
+    <h1 class="h"><span class="ln">Opiskelu­paikasta</span><span class="ln accent">työuraan.</span></h1>
   </div>
-  <div class="steps"><div class="rail"></div>
-    <div class="step"><i></i><span>Ennen saapumista</span></div>
-    <div class="step"><i></i><span>Perhe mukaan</span></div>
-    <div class="step"><i></i><span>Harjoittelu</span></div>
-    <div class="step"><i></i><span>Työura alueella</span></div>
+  <div class="stage">
+    <p class="sub">Polku kansainvälisille opiskelijoille ja heidän perheilleen.</p>
+    <div class="steps"><div class="rail"></div>
+      <div class="step"><i></i><span>Ennen saapumista</span></div>
+      <div class="step"><i></i><span>Perhe mukaan</span></div>
+      <div class="step"><i></i><span>Harjoittelu</span></div>
+      <div class="step"><i></i><span>Työura alueella</span></div>
+    </div>
   </div>
-  <div class="cta-wrap"><span class="cta">Aloita maksutta</span><span class="url">worklife.voon.fi</span></div>
+  <div class="cta-wrap"><span class="cta">Aloita</span><span class="url">worklife.voon.fi</span></div>
 </section>
 
-<!-- 2 · SkillPath · violetti -->
-<section class="reel skillpath" id="reel-2-skillpath">
-  <img class="mark" src="assets/voon-mark-white.png" alt="">
-  <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
+<!-- 2 · SkillPath · vaaleanharmaa -->
+<section class="reel light" id="reel-2-skillpath">
+  <img class="mark" src="assets/voon-mark.png" alt="">
+  <img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ">
   <div class="copy">
     <p class="eyebrow">SkillPath · Maksuton</p>
-    <h1 class="h"><span class="ln">Osaamisesta</span><span class="ln">ammattiin.</span></h1>
-    <p class="sub">Kerro omin sanoin, mitä osaat. Tekoäly näyttää sopivat ammatit ja koulutukset.</p>
+    <h1 class="h"><span class="ln">Osaamisesta</span><span class="ln accent">ammattiin.</span></h1>
   </div>
-  <div class="steps"><div class="rail"></div>
-    <div class="step"><i></i><span>Kuvaile taustasi</span></div>
-    <div class="step"><i></i><span>Näe taitosi</span></div>
-    <div class="step"><i></i><span>Ammattiosumat</span></div>
-    <div class="step"><i></i><span>Polku koulutukseen</span></div>
+  <div class="stage">
+    <p class="sub">Kerro omin sanoin, mitä osaat. Tekoäly tekee loput.</p>
+    <div class="steps"><div class="rail"></div>
+      <div class="step"><i></i><span>Kuvaile taustasi</span></div>
+      <div class="step"><i></i><span>Näe taitosi</span></div>
+      <div class="step"><i></i><span>Ammattiosumat</span></div>
+      <div class="step"><i></i><span>Koulutuspolku</span></div>
+    </div>
   </div>
-  <div class="cta-wrap"><span class="cta">Kokeile nyt</span><span class="url">tyo.voon.fi</span></div>
+  <div class="cta-wrap"><span class="cta">Kokeile</span><span class="url">tyo.voon.fi</span></div>
 </section>
 
-<!-- 3 · Talent Factory · petrooli -->
-<section class="reel factory" id="reel-3-talent-factory" style="--h:92px;">
+<!-- 3 · Talent Factory · musta -->
+<section class="reel" id="reel-3-talent-factory">
   <img class="mark" src="assets/voon-mark-white.png" alt="">
   <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
   <div class="copy">
-    <p class="eyebrow">Talent Factory · Uusi 2026</p>
-    <h1 class="h"><span class="ln">CV, jonka</span><span class="ln">suomalainen</span><span class="ln">työnantaja ymmärtää.</span></h1>
-    <p class="sub">ESCO-pohjainen CV-työkalu Suomeen muuttaneille.</p>
+    <p class="eyebrow">Talent Factory</p>
+    <h1 class="h"><span class="ln">CV, jonka</span><span class="ln">työnantaja</span><span class="ln accent">ymmärtää.</span></h1>
   </div>
-  <div class="steps" style="top:970px;"><div class="rail"></div>
-    <div class="step"><i></i><span>Ammattinimike</span></div>
-    <div class="step"><i></i><span>Taidot EU-standardilla</span></div>
-    <div class="step"><i></i><span>Suositellut lisäykset</span></div>
-    <div class="step"><i></i><span>Valmis CV</span></div>
+  <div class="stage">
+    <p class="sub">CV-työkalu Suomeen muuttaneille. Taidot EU-standardilla.</p>
+    <div class="steps"><div class="rail"></div>
+      <div class="step"><i></i><span>Ammattinimike</span></div>
+      <div class="step"><i></i><span>Taidot</span></div>
+      <div class="step"><i></i><span>Suositukset</span></div>
+      <div class="step"><i></i><span>Valmis CV</span></div>
+    </div>
   </div>
   <div class="cta-wrap"><span class="cta">Luo CV</span><span class="url">worklife.voon.fi</span></div>
 </section>
 
-<!-- 4 · BizPulse · musta -->
-<section class="reel bizpulse" id="reel-4-bizpulse">
-  <img class="mark" src="assets/voon-mark-white.png" alt="">
-  <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
+<!-- 4 · BizPulse · valkoinen -->
+<section class="reel white" id="reel-4-bizpulse">
+  <img class="mark" src="assets/voon-mark.png" alt="">
+  <img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ">
   <div class="copy">
-    <p class="eyebrow">BizPulse · Pilotit maksutta</p>
+    <p class="eyebrow">BizPulse</p>
     <h1 class="h"><span class="ln">Vähemmän</span><span class="ln">hallintoa.</span><span class="ln accent">Enemmän aikaa.</span></h1>
-    <p class="sub">Kevyt toiminnanohjaus pk-yrityksille ja yrittäjille.</p>
   </div>
-  <div class="steps"><div class="rail"></div>
-    <div class="step"><i></i><span>Kuva laskusta</span></div>
-    <div class="step"><i></i><span>Tiedot luettu</span></div>
-    <div class="step"><i></i><span>Eräpäivä kalenteriin</span></div>
-    <div class="step"><i></i><span>Raportti joka aamu</span></div>
+  <div class="stage">
+    <p class="sub">Kevyt toiminnanohjaus yrittäjille. Pilotit nyt maksutta.</p>
+    <div class="steps"><div class="rail"></div>
+      <div class="step"><i></i><span>Kuva laskusta</span></div>
+      <div class="step"><i></i><span>Tiedot luettu</span></div>
+      <div class="step"><i></i><span>Eräpäivä kalenteriin</span></div>
+      <div class="step"><i></i><span>Raportti aamulla</span></div>
+    </div>
   </div>
   <div class="cta-wrap"><span class="cta">Hae pilottiin</span><span class="url">biz.voon.fi</span></div>
 </section>
 
-<!-- 5 · Nordway · pohjoisen sininen -->
-<section class="reel nordway" id="reel-5-nordway">
+<!-- 5 · Nordway · musta -->
+<section class="reel" id="reel-5-nordway">
   <img class="mark" src="assets/voon-mark-white.png" alt="">
   <img class="logo" src="assets/voon-logo-white.png" alt="VOON IQ">
   <div class="copy">
     <p class="eyebrow">Nordway</p>
-    <h1 class="h"><span class="ln">Turkista</span><span class="ln">Suomeen.</span></h1>
-    <p class="sub">Neuvontaa työhön, yrittäjyyteen, opiskeluun ja perheenyhdistämiseen.</p>
+    <h1 class="h"><span class="ln">Turkista</span><span class="ln accent">Suomeen.</span></h1>
   </div>
-  <div class="steps"><div class="rail"></div>
-    <div class="step"><i></i><span>Ohjattu aloitus</span></div>
-    <div class="step"><i></i><span>Turvallinen asiakirjasäilö</span></div>
-    <div class="step"><i></i><span>Oma asiantuntija</span></div>
-    <div class="step"><i></i><span>Uusi arki Suomessa</span></div>
+  <div class="stage">
+    <p class="sub">Työ, yrittäjyys, opiskelu ja perheen yhdistäminen.</p>
+    <div class="steps"><div class="rail"></div>
+      <div class="step"><i></i><span>Ohjattu aloitus</span></div>
+      <div class="step"><i></i><span>Asiakirjat turvassa</span></div>
+      <div class="step"><i></i><span>Oma asiantuntija</span></div>
+      <div class="step"><i></i><span>Uusi arki</span></div>
+    </div>
   </div>
   <div class="cta-wrap"><span class="cta">Aloita</span><span class="url">nordway.voon.fi</span></div>
 </section>
 
-<!-- 6 · Tekoälypalvelut · vaalea -->
-<section class="reel ai" id="reel-6-tekoalypalvelut">
+<!-- 6 · Tekoälypalvelut · vaaleanharmaa -->
+<section class="reel light" id="reel-6-tekoalypalvelut">
   <img class="mark" src="assets/voon-mark.png" alt="">
   <img class="logo" src="assets/voon-logo-color.png" alt="VOON IQ">
   <div class="copy">
-    <p class="eyebrow">Tekoälypalvelut yrityksille</p>
+    <p class="eyebrow">Yrityksille</p>
     <h1 class="h"><span class="ln">Tekoäly</span><span class="ln">käyttöön.</span><span class="ln accent">Hallitusti.</span></h1>
-    <p class="sub">Aloitamme mitattavasta tarpeesta.</p>
   </div>
-  <div class="steps"><div class="rail"></div>
-    <div class="step"><i></i><span>Tekoälykartoitus</span></div>
-    <div class="step"><i></i><span>Kokeilu</span></div>
-    <div class="step"><i></i><span>Käyttöönotto</span></div>
-    <div class="step"><i></i><span>Tietoturva ja lokit</span></div>
+  <div class="stage">
+    <p class="sub">Aloitamme mitattavasta tarpeesta.</p>
+    <div class="steps"><div class="rail"></div>
+      <div class="step"><i></i><span>Kartoitus</span></div>
+      <div class="step"><i></i><span>Kokeilu</span></div>
+      <div class="step"><i></i><span>Käyttöönotto</span></div>
+      <div class="step"><i></i><span>Tietoturva</span></div>
+    </div>
   </div>
   <div class="cta-wrap"><span class="cta">Varaa kartoitus</span><span class="url">voon.fi</span></div>
 </section>
 
 <script>
+  // Sovita otsikko: suurin koko (enintään 132 px), jolla jokainen rivi mahtuu turva-alueelle.
+  window.fit = () => document.querySelectorAll('.reel').forEach((reel) => {
+    const h = reel.querySelector('.h');
+    const max = reel.querySelector('.copy').clientWidth;
+    let size = 132;
+    h.style.setProperty('--h', size + 'px');
+    while (size > 80 && [...h.querySelectorAll('.ln')].some((l) => l.offsetWidth > max)) {
+      size -= 2;
+      h.style.setProperty('--h', size + 'px');
+    }
+  });
   // Renderöinti: aseta kaikkien animaatioiden aika (ms) kehys kerrallaan.
   window.setT = (ms) => document.getAnimations().forEach((a) => { a.pause(); a.currentTime = ms; });
   window.solo = (id) => {
     document.body.classList.add('solo');
     document.querySelectorAll('.reel').forEach((r) => r.classList.toggle('on', r.id === id));
   };
+  document.fonts.ready.then(window.fit);
 </script>
 </body>
 </html>
